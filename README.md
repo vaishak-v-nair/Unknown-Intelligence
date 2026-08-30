@@ -42,7 +42,3 @@ Once running, access the dashboard at: **http://localhost:5173**
 
 ## 4. The Proactive Orchestrator
 When you run `start.ps1`, it spins up `src/orchestrator.py` in the background. This is an infinite loop that constantly monitors the SQLite database for new data, groups anomalous behavior, and automatically fires off LLM investigations without any human intervention.
-# Unknown-Unknown-Intelligence
-# Unknown-Unknown-Intelligence
-# Unknown-Unknown-Intelligence
-# Unknown-Unknown-Intelligence
