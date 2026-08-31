@@ -26,11 +26,6 @@ export default function LandingPage() {
           initial="hidden"
           animate="visible"
         >
-          <motion.div variants={fadeUp} className="inline-flex items-center px-4 py-2 mb-8 brutal-border">
-            <span className="w-2 h-2 bg-accent-secondary mr-3 animate-pulse"></span>
-            <span className="text-xs font-mono font-bold tracking-[0.2em] uppercase text-text-primary">System v2.0 // Active</span>
-          </motion.div>
-          
           <motion.h1 variants={fadeUp} className="font-display text-7xl md:text-[10rem] font-bold tracking-tighter leading-[0.8] mb-8 text-text-primary uppercase">
             Reveal <br/>
             <span className="text-accent-primary">The Unseen.</span>

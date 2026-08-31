@@ -140,10 +140,6 @@ export default function DashboardPage() {
             <button onClick={loadAllData} className="flex items-center justify-center p-3 border border-white/20 hover:bg-white hover:text-black transition-colors text-white">
               <RefreshCw size={18} className={loading ? "animate-spin text-accent-primary" : ""} />
             </button>
-            <div className="border border-white/20 px-4 py-3 text-sm flex items-center gap-3 bg-black">
-              <Clock size={16} className="text-accent-primary animate-pulse" />
-              <span className="font-mono tracking-widest text-text-primary uppercase font-bold">Live_Feed</span>
-            </div>
           </div>
         </header>
 
@@ -312,9 +308,6 @@ export default function DashboardPage() {
                       <div className="font-display font-bold text-2xl uppercase tracking-wide">Model RAG Verification Active</div>
                       <div className="text-sm font-mono mt-2 font-medium">LLM queries are correctly routed to the Milvus vector database representations.</div>
                     </div>
-                  </div>
-                  <div className="px-6 py-3 bg-black text-accent-primary font-mono text-sm font-bold tracking-widest uppercase">
-                    Hybrid Search Engine
                   </div>
                 </div>
 
