@@ -29,7 +29,6 @@ def compute_hash(claim, evidence_ids):
     raw = claim + str(sorted(evidence_ids))
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
-
 def _candidate(claim, evidence_ids, score, status="UNVERIFIED_CANDIDATE"):
     return {
         "id": f"cand_{uuid.uuid4()}",
@@ -41,10 +40,126 @@ def _candidate(claim, evidence_ids, score, status="UNVERIFIED_CANDIDATE"):
         "created_at": datetime.utcnow().isoformat() + "Z",
     }
 
-
 def cross_author_convergence(db):
-    """Groups observations by extracted-claim, requiring >= MIN_AUTHORS distinct
-    authors. Returns raw candidate rows (dicts to be turned into findings)."""
+    """
+    Groups observations by Semantic Vector Clustering.
+    Instead of exact string matching, we embed observations and cluster them.
+    If a cluster contains >= MIN_AUTHORS distinct authors, it's surfaced.
+    """
+    try:
+        from .rag_engine import get_rag_engine
+        rag = get_rag_engine()
+        import numpy as np
+        from sklearn.cluster import DBSCAN
+        from sklearn.metrics.pairwise import cosine_distances
+    except ImportError:
+        return _fallback_cross_author_convergence(db)
+        
+    # 1. Fetch all observations with their event/author data
+    pipeline = [
+        {
+            "$lookup": {
+                "from": "events",
+                "localField": "event_id",
+                "foreignField": "id",
+                "as": "event",
+            }
+        },
+        {"$unwind": "$event"},
+        {
+            "$lookup": {
+                "from": "entities",
+                "localField": "event.entity_id",
+                "foreignField": "id",
+                "as": "entity",
+            }
+        },
+        {"$unwind": "$entity"},
+        {
+            "$project": {
+                "content": 1,
+                "event_id": "$event.id",
+                "author": "$event.actor",
+                "entity_id": "$entity.id",
+                "entity_name": "$entity.name"
+            }
+        }
+    ]
+    
+    try:
+        obs_list = list(db.observations.aggregate(pipeline))
+    except Exception as exc:
+        print(f"[candidate] convergence aggregation failed: {exc}")
+        return []
+        
+    if not obs_list:
+        return []
+        
+    if not rag.vector or not rag.encoder:
+        print("[candidate] RAG vector engine not available. Falling back to exact string match.")
+        return _fallback_cross_author_convergence(db)
+        
+    texts = [o.get("content", "") for o in obs_list]
+    
+    # 2. Compute Embeddings
+    embeddings = rag.encoder.encode(texts)
+    
+    # 3. Cluster using DBSCAN (cosine distance)
+    # eps = 0.25 means we require cosine similarity >= 0.75
+    dist_matrix = cosine_distances(embeddings)
+    clustering = DBSCAN(eps=0.25, min_samples=2, metric='precomputed')
+    labels = clustering.fit_predict(dist_matrix)
+    
+    # 4. Analyze Clusters
+    clusters = {}
+    for i, label in enumerate(labels):
+        if label == -1:
+            continue
+        if label not in clusters:
+            clusters[label] = []
+        clusters[label].append(i)
+        
+    candidates = []
+    for label, indices in clusters.items():
+        unique_authors = set()
+        entity_ids = set()
+        sample_names = set()
+        
+        for idx in indices:
+            o = obs_list[idx]
+            if o.get("author"): unique_authors.add(o["author"])
+            if o.get("entity_id"): entity_ids.add(o["entity_id"])
+            if o.get("entity_name"): sample_names.add(o["entity_name"])
+            
+        if len(unique_authors) >= MIN_AUTHORS:
+            authors_count = len(unique_authors)
+            names = list(sample_names)
+            topic = ", ".join(names[:4]) if names else "Correlated Entities"
+            
+            cluster_dists = dist_matrix[np.ix_(indices, indices)]
+            # avg sim = 1 - avg distance
+            if len(indices) > 1:
+                avg_sim = 1.0 - (np.sum(cluster_dists) / (len(indices) * (len(indices) - 1)))
+            else:
+                avg_sim = 1.0
+                
+            semantic_score = float(min(0.99, max(0.0, avg_sim)))
+            
+            claim = (
+                f"True Semantic Convergence (Similarity: {semantic_score*100:.1f}%): "
+                f"{authors_count} independent actors reported mathematically correlated events "
+                f"regarding ({topic})."
+            )
+            score = min(0.98, 0.75 + (authors_count - MIN_AUTHORS) * 0.05 + semantic_score * 0.1)
+            
+            cand = _candidate(claim, list(entity_ids), round(score, 3))
+            cand["semantic_score"] = round(semantic_score, 3)
+            candidates.append(cand)
+            
+    return candidates
+
+def _fallback_cross_author_convergence(db):
+    """Fallback string-matching if vector engine is missing."""
     pipeline = [
         {"$match": {"extracted_claims": {"$ne": "[]", "$nin": ["[]", ""]}}},
         {
@@ -106,7 +221,6 @@ def cross_author_convergence(db):
             f"on a common claim ({topic}). "
             f"Signal: {item['count']} records share this pattern."
         )
-        # Edge toward importance with more converging authors / volume.
         score = min(0.95, 0.7 + (authors - MIN_AUTHORS) * 0.06 + (item["count"] / 100.0))
         candidates.append(_candidate(claim, entity_ids, round(score, 3)))
 

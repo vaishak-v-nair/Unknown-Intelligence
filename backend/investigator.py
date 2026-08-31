@@ -112,7 +112,7 @@ def _normalize_report(parsed):
     }
 
 
-def call_reasoning_model(prompt):
+def call_reasoning_model(system_prompt, user_prompt):
     """Runs the investigation prompt through the first working provider."""
 
     # --- Groq ---
@@ -128,11 +128,9 @@ def call_reasoning_model(prompt):
                     "messages": [
                         {
                             "role": "system",
-                            "content": "You are a Staff Engineer verifying a "
-                            "candidate discovery. Respond with ONLY valid JSON "
-                            "matching the requested schema. No markdown.",
+                            "content": system_prompt,
                         },
-                        {"role": "user", "content": prompt},
+                        {"role": "user", "content": user_prompt},
                     ],
                     "response_format": {"type": "json_object"},
                     "temperature": 0.2,
@@ -151,7 +149,10 @@ def call_reasoning_model(prompt):
                 {"Authorization": f"Bearer {or_key}", "Content-Type": "application/json"},
                 {
                     "model": os.getenv("OPENROUTER_MODEL", "deepseek/deepseek-chat-v3-0324:free"),
-                    "messages": [{"role": "user", "content": prompt}],
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt}
+                    ],
                     "temperature": 0.2,
                 },
             )
@@ -170,7 +171,9 @@ def call_reasoning_model(prompt):
             resp = requests.post(
                 url,
                 json={
-                    "contents": [{"parts": [{"text": prompt}]}],
+                    "contents": [
+                        {"role": "user", "parts": [{"text": system_prompt + "\n\n" + user_prompt}]}
+                    ],
                     "generationConfig": {"response_mime_type": "application/json"},
                 },
                 timeout=30,
@@ -183,26 +186,47 @@ def call_reasoning_model(prompt):
             print(f"[investigator] Gemini failed ({exc}); using mock fallback.")
 
     print("[investigator] No working provider; using deterministic mock.")
-    return _mock_report(prompt)
+    return _mock_report(user_prompt)
 
 
-def format_investigation_prompt(candidate_claim, evidence_records):
+def format_synthesizer_prompt(candidate_claim, evidence_records):
     evidence_text = "\n\n".join(
         f"Evidence {i+1}: {e}" for i, e in enumerate(evidence_records)
     )
     return f"""
-You are an expert Staff Engineer investigating a potential systemic discovery.
 The Aurora intelligence system surfaced this candidate hypothesis:
 
-HYPOTHESIS: {candidate_claim}
+CANDIDATE SIGNAL: {candidate_claim}
 
-EVIDENCE:
+RAW EVIDENCE:
+{evidence_text}
+
+TASK:
+Synthesize the evidence into a clear, cohesive hypothesis that connects these distinct observations.
+Do NOT output the final Verification status. 
+Output strict JSON matching this schema (no markdown):
+{{
+  "claim": "The synthesized claim connecting the evidence",
+  "evidence_summary": "How the raw evidence connects to support this claim"
+}}
+"""
+
+def format_skeptic_prompt(synthesized_claim, evidence_records):
+    evidence_text = "\n\n".join(
+        f"Evidence {i+1}: {e}" for i, e in enumerate(evidence_records)
+    )
+    return f"""
+A colleague has proposed the following synthesized hypothesis based on raw evidence:
+
+PROPOSED HYPOTHESIS: {synthesized_claim}
+
+RAW EVIDENCE:
 {evidence_text}
 
 TASK:
 Determine whether this is a real, MATERIAL discovery that warrants escalating
 to a human (a signal that is not merely statistically unusual but also
-potentially action-worthy). Use these rules:
+potentially action-worthy). Be highly skeptical.
 - VERIFIED_DISCOVERY if the evidence genuinely supports a material,
   actionable pattern or deviation and counter-explanations are weak.
 - REJECTED if the evidence shows only noise, unrelated items, or a condition
@@ -214,9 +238,7 @@ honestly.
 Output strict JSON (no markdown, no backticks):
 {{
   "status": "VERIFIED_DISCOVERY | REJECTED | INSUFFICIENT_EVIDENCE",
-  "claim": "Clear verified claim",
-  "why_surfaced": "Why the evidence triggered this",
-  "evidence_summary": "Summarize the raw evidence",
+  "why_surfaced": "Why this passed or failed verification",
   "alternative_explanations": "What else could explain this",
   "confidence_score": 0.0
 }}
@@ -267,14 +289,24 @@ def investigate_candidates():
                     if h not in evidence_records:
                         evidence_records.append(h)
 
-            prompt = format_investigation_prompt(claim, evidence_records[:8])
-            report = call_reasoning_model(prompt)
+            # 1. Synthesizer Agent
+            synth_prompt = format_synthesizer_prompt(claim, evidence_records[:8])
+            synth_sys = "You are the Intelligence Synthesizer. Output strictly valid JSON."
+            synth_report = call_reasoning_model(synth_sys, synth_prompt)
+            
+            synthesized_claim = synth_report.get("claim", claim)
+            evidence_summary = synth_report.get("evidence_summary", "")
 
-            status = report.get("status", "INSUFFICIENT_EVIDENCE")
+            # 2. Skeptic Agent
+            skeptic_prompt = format_skeptic_prompt(synthesized_claim, evidence_records[:8])
+            skeptic_sys = "You are an expert Staff Engineer investigating a potential systemic discovery. You are highly skeptical. Output strictly valid JSON."
+            final_report = call_reasoning_model(skeptic_sys, skeptic_prompt)
+
+            status = final_report.get("status", "INSUFFICIENT_EVIDENCE")
             if status not in STATUS_STATES:
                 status = "INSUFFICIENT_EVIDENCE"
 
-            confidence = float(report.get("confidence_score", 0.0))
+            confidence = float(final_report.get("confidence_score", 0.0))
             confidence = max(0.0, min(1.0, confidence))
 
             db.findings.update_one(
@@ -283,10 +315,10 @@ def investigate_candidates():
                     "$set": {
                         "status": status,
                         "significance_score": confidence,
-                        "claim": report.get("claim", claim),
-                        "why_surfaced": report.get("why_surfaced", ""),
-                        "evidence_summary": report.get("evidence_summary", ""),
-                        "alternative_explanations": report.get(
+                        "claim": synthesized_claim,
+                        "why_surfaced": final_report.get("why_surfaced", ""),
+                        "evidence_summary": evidence_summary,
+                        "alternative_explanations": final_report.get(
                             "alternative_explanations", ""
                         ),
                         "investigated_at": datetime.utcnow().isoformat() + "Z",

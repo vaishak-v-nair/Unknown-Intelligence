@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Activity, ShieldAlert, CheckCircle2, ChevronRight, X, Clock, Database, RefreshCw, Cpu, Eye, Terminal, Server, HardDrive, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchFindings, fetchEvidence, fetchTelemetry, fetchSystemStatus } from '../api';
+import { Share2 } from 'lucide-react';
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState('anomalies');
@@ -407,15 +408,89 @@ export default function DashboardPage() {
                       <div key={i} className="border border-white/10 bg-black h-40 w-full mb-4 animate-pulse"></div>
                     ))
                   ) : (
-                    <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-6">
+                      
+                      {/* Semantic Topology Visualization */}
+                      {evidence.length > 0 && (
+                        <div className="border border-white/10 p-6 bg-[#020202]">
+                          <div className="flex items-center gap-3 mb-6">
+                            <Share2 size={16} className="text-accent-primary" />
+                            <span className="text-xs font-mono uppercase text-text-secondary tracking-widest font-bold">Semantic Topology</span>
+                          </div>
+                          
+                          <div className="relative h-64 w-full flex items-center justify-center overflow-hidden">
+                            {/* SVG connections */}
+                            <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                              {evidence.map((ev, i) => {
+                                const angle = (i / evidence.length) * Math.PI * 2;
+                                const radius = 80;
+                                const cx = '50%';
+                                const cy = '50%';
+                                // Calculate end points manually using standard trigonometry in SVG is hard dynamically without state, 
+                                // so we'll just draw lines from center (50%, 50%) to nodes that we'll position absolutely.
+                                return (
+                                  <motion.line
+                                    key={`line-${i}`}
+                                    initial={{ pathLength: 0, opacity: 0 }}
+                                    animate={{ pathLength: 1, opacity: 0.3 }}
+                                    transition={{ duration: 1, delay: i * 0.1 }}
+                                    x1="50%" y1="50%"
+                                    x2={`calc(50% + ${Math.cos(angle) * radius}px)`}
+                                    y2={`calc(50% + ${Math.sin(angle) * radius}px)`}
+                                    stroke="#ccff00"
+                                    strokeWidth="1"
+                                    strokeDasharray="4 4"
+                                  />
+                                );
+                              })}
+                            </svg>
+
+                            {/* Center Node (The Concept) */}
+                            <motion.div 
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="absolute z-10 w-16 h-16 bg-accent-primary rounded-none flex items-center justify-center text-black font-mono text-xs font-bold shadow-[0_0_30px_rgba(204,255,0,0.4)]"
+                            >
+                              CORE
+                            </motion.div>
+
+                            {/* Evidence Nodes */}
+                            {evidence.map((ev, i) => {
+                                const angle = (i / evidence.length) * Math.PI * 2;
+                                const radius = 80;
+                                return (
+                                  <motion.div
+                                    key={`node-${i}`}
+                                    initial={{ scale: 0, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    transition={{ type: "spring", delay: 0.5 + i * 0.1 }}
+                                    className="absolute w-8 h-8 bg-black border border-white flex items-center justify-center text-[10px] font-bold text-white uppercase font-display"
+                                    style={{
+                                      left: `calc(50% + ${Math.cos(angle) * radius}px - 16px)`,
+                                      top: `calc(50% + ${Math.sin(angle) * radius}px - 16px)`,
+                                    }}
+                                    title={`@${ev.author}`}
+                                  >
+                                    {ev.author.charAt(0)}
+                                  </motion.div>
+                                );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex flex-col gap-4 mt-2">
                       {evidence.map((ev, i) => (
                         <motion.div 
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.1 }}
                           key={i} 
-                          className="border border-white/10 p-6 bg-black group hover:border-white/30 transition-colors"
+                          className="border border-white/10 p-6 bg-black group hover:border-white/30 transition-colors relative overflow-hidden"
                         >
+                          {/* Subtle highlight bar */}
+                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-accent-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                          
                           <div className="flex justify-between mb-4 pb-4 brutal-border-b">
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 bg-white flex items-center justify-center text-sm font-bold text-black font-display uppercase">
@@ -435,6 +510,7 @@ export default function DashboardPage() {
                           </div>
                         </motion.div>
                       ))}
+                    </div>
                     </div>
                   )}
                 </div>
