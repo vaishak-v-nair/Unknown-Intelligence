@@ -39,7 +39,7 @@ Built for infinite scale with zero downtime.
    ```powershell
    python -m venv .venv
    .\.venv\Scripts\activate
-   pip install -r requirements.txt
+   pip install -r requirements-local.txt
    ```
 2. Prepare the frontend:
    ```powershell
