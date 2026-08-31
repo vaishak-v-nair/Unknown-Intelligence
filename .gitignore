@@ -33,3 +33,9 @@ Thumbs.db
 # Dataset
 dataset/*
 !dataset/README.md
+
+# PRAXIS: your personal hooks — never commit these onto teammates
+.claude/settings.local.json
+
+# PRAXIS local memory (may contain project details — commit only after review)
+.praxis/

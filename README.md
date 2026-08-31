@@ -1,4 +1,4 @@
-# Aurora Intelligence (Unknown-Unknowns)
+# Unknown-Intelligence
 
 A full-stack, proactive data intelligence platform designed to discover important anomalies you didn't know to ask about. Built strictly with Zero-Budget architecture (SQLite, Python, React, FastAPI).
 
@@ -41,4 +41,4 @@ To launch the entire platform (Frontend, Backend, and Proactive Background Orche
 Once running, access the dashboard at: **http://localhost:5173**
 
 ## 4. The Proactive Orchestrator
-When you run `start.ps1`, it spins up `src/orchestrator.py` in the background. This is an infinite loop that constantly monitors the SQLite database for new data, groups anomalous behavior, and automatically fires off LLM investigations without any human intervention.
+When you run `start.ps1`, it spins up `backend/orchestrator.py` in the background. This is an infinite loop that constantly monitors the SQLite database for new data, groups anomalous behavior, and automatically fires off LLM investigations without any human intervention.

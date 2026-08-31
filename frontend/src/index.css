@@ -1,47 +1,72 @@
 @import "tailwindcss";
 
 @theme {
-  --color-space-black: #0B0F17;
-  --color-accent-primary: #6366F1;
-  --color-accent-secondary: #8B5CF6;
+  --color-space-black: #050505; /* Deep luxury black */
+  --color-accent-primary: #8b5cf6;
+  --color-accent-secondary: #ec4899;
+  --color-accent-glow: rgba(236, 72, 153, 0.15);
+  
   --color-text-primary: #F8FAFC;
-  --color-text-secondary: #94A3B8;
+  --color-text-secondary: #A1A1AA;
   
   --font-sans: 'Inter', -apple-system, sans-serif;
+  --font-display: 'Outfit', 'Inter', -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
 
 @layer base {
   body {
-    @apply bg-space-black text-text-primary font-sans antialiased;
-    background-image: radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08), transparent 25%),
-                      radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08), transparent 25%);
+    @apply bg-space-black text-text-primary font-sans antialiased overflow-x-hidden;
+    /* Adding a subtle noise/grain for a premium textured feel */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
     background-attachment: fixed;
+  }
+  
+  ::selection {
+    @apply bg-accent-primary/30 text-white;
   }
 }
 
 @layer utilities {
   .glass-panel {
-    @apply bg-gray-900/40 backdrop-blur-md border border-indigo-500/15 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] rounded-xl;
+    @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] rounded-2xl;
+    box-shadow: 0 4px 24px -1px rgba(0,0,0,0.2), inset 0 1px 0 0 rgba(255,255,255,0.05);
   }
   
   .glass-nav {
-    @apply flex justify-between items-center px-8 py-4 bg-gray-900/60 backdrop-blur-xl border-b border-indigo-500/15 sticky top-0 z-50;
+    @apply flex justify-between items-center px-8 py-4 bg-[#050505]/70 backdrop-blur-2xl border-b border-white/[0.05] sticky top-0 z-50;
   }
 
   .text-gradient {
-    @apply bg-gradient-to-r from-accent-secondary to-accent-primary bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-accent-primary to-accent-secondary bg-clip-text text-transparent;
   }
   
   .badge-success {
-    @apply text-emerald-500 border-emerald-500/30 bg-emerald-500/10 shadow-[0_0_10px_rgba(16,185,129,0.2)];
+    @apply text-emerald-400 border border-emerald-500/20 bg-emerald-500/10 rounded-full px-3 py-0.5 text-xs font-medium tracking-wide shadow-[0_0_15px_rgba(16,185,129,0.15)];
   }
   
   .badge-warning {
-    @apply text-amber-500 border-amber-500/30 bg-amber-500/10 shadow-[0_0_10px_rgba(245,158,11,0.2)];
+    @apply text-amber-400 border border-amber-500/20 bg-amber-500/10 rounded-full px-3 py-0.5 text-xs font-medium tracking-wide shadow-[0_0_15px_rgba(245,158,11,0.15)];
   }
   
   .badge-danger {
-    @apply text-red-500 border-red-500/30 bg-red-500/10 shadow-[0_0_10px_rgba(239,68,68,0.2)];
+    @apply text-rose-400 border border-rose-500/20 bg-rose-500/10 rounded-full px-3 py-0.5 text-xs font-medium tracking-wide shadow-[0_0_15px_rgba(225,29,72,0.15)];
+  }
+
+  .premium-glow {
+    position: relative;
+  }
+  .premium-glow::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(to right, theme(colors.accent-primary), theme(colors.accent-secondary));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.5;
+    pointer-events: none;
   }
 }

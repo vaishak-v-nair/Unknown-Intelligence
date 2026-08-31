@@ -19,7 +19,7 @@ try {
     Write-Host "[*] Starting FastAPI Backend on port 8000..." -ForegroundColor Green
     $backendJob = Start-Job -ScriptBlock {
         cd $using:PWD
-        python -m uvicorn src.api:app --port 8000
+        .\.venv\Scripts\python -m uvicorn backend.api:app --port 8000
     }
     $Jobs += $backendJob
 
@@ -35,7 +35,7 @@ try {
     Write-Host "[*] Starting Proactive Orchestrator..." -ForegroundColor Green
     $orchestratorJob = Start-Job -ScriptBlock {
         cd $using:PWD
-        python -m src.orchestrator
+        .\.venv\Scripts\python -m backend.orchestrator
     }
     $Jobs += $orchestratorJob
 

@@ -13,3 +13,15 @@ export const fetchEvidence = async (findingId) => {
   const response = await axios.get(`${API_BASE_URL}/findings/${findingId}/evidence`);
   return response.data;
 };
+
+export const fetchTelemetry = async (limit = 50) => {
+  const response = await axios.get(`${API_BASE_URL}/telemetry`, {
+    params: { limit }
+  });
+  return response.data;
+};
+
+export const fetchSystemStatus = async () => {
+  const response = await axios.get(`${API_BASE_URL}/status`);
+  return response.data;
+};

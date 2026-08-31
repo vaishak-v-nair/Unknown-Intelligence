@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "praxis": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "praxis-memory",
+        "mcp"
+      ]
+    }
+  }
+}
