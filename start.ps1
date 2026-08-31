@@ -8,7 +8,7 @@ It manages all child processes and ensures they are cleanly terminated when the 
 #>
 
 Write-Host "==================================================" -ForegroundColor Cyan
-Write-Host " STARTING AURORA INTELLIGENCE (FULL STACK)        " -ForegroundColor Cyan
+Write-Host " STARTING UNKNOWN INTELLIGENCE (FULL STACK)       " -ForegroundColor Cyan
 Write-Host "==================================================" -ForegroundColor Cyan
 
 # Store job objects

@@ -88,7 +88,7 @@ export default function DashboardPage() {
             <Database size={24} className="text-black" />
           </div>
           <div>
-            <h1 className="text-xl font-display font-bold tracking-widest text-text-primary uppercase">Aurora</h1>
+            <h1 className="text-xl font-display font-bold tracking-widest text-text-primary uppercase">Unknown</h1>
             <div className="text-xs text-text-secondary font-mono tracking-widest uppercase">Intelligence</div>
           </div>
         </div>
@@ -314,7 +314,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <div className="px-6 py-3 bg-black text-accent-primary font-mono text-sm font-bold tracking-widest uppercase">
-                    MongoDB + Milvus 
+                    Hybrid Search Engine
                   </div>
                 </div>
 

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Database, Cpu, Eye } from "lucide-react";
+import { Database, Cpu, Eye, ArrowRight, Server, Shield, Network } from "lucide-react";
 
 export default function LandingPage() {
   const staggerContainer = {
@@ -81,6 +81,101 @@ export default function LandingPage() {
             <p className="font-mono text-sm uppercase tracking-wide leading-relaxed opacity-70 group-hover:opacity-100">By tracking distinct author convergence, we identify critical 'Unknowns' before they become failures.</p>
           </motion.div>
         </motion.div>
+      </div>
+
+      {/* Pipeline Section */}
+      <div className="relative w-full z-10 bg-black brutal-border-b py-24">
+        <div className="max-w-7xl mx-auto px-8 md:px-16">
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerContainer}
+            className="flex flex-col md:flex-row gap-16"
+          >
+            <div className="flex-1">
+              <motion.h2 variants={fadeUp} className="font-display text-5xl md:text-7xl font-bold uppercase mb-8">
+                The <span className="text-accent-secondary">Pipeline.</span>
+              </motion.h2>
+              <motion.p variants={fadeUp} className="font-mono text-sm text-text-secondary uppercase tracking-widest leading-relaxed max-w-md">
+                Unknown Intelligence operates via a strict three-phase proactive ingestion loop. Raw data enters, noise is stripped, and highly structured anomalies are discovered entirely in the background.
+              </motion.p>
+            </div>
+            
+            <div className="flex-1 flex flex-col gap-8 font-mono">
+              <motion.div variants={fadeUp} className="brutal-border p-8 hover:border-accent-primary transition-colors">
+                <div className="text-accent-primary font-bold text-2xl mb-2">01. INGESTION</div>
+                <div className="text-text-secondary text-sm uppercase">Scraping massive parallel streams of data from raw API events, normalizing structured payloads into a scalable NoSQL backend.</div>
+              </motion.div>
+              <motion.div variants={fadeUp} className="brutal-border p-8 hover:border-accent-secondary transition-colors">
+                <div className="text-accent-secondary font-bold text-2xl mb-2">02. VECTORIZATION</div>
+                <div className="text-text-secondary text-sm uppercase">Translating textual observations into high-dimensional vector embeddings, allowing for rapid semantic similarity search across disconnected authors.</div>
+              </motion.div>
+              <motion.div variants={fadeUp} className="brutal-border p-8 hover:border-white transition-colors">
+                <div className="text-white font-bold text-2xl mb-2">03. SYNTHESIS</div>
+                <div className="text-text-secondary text-sm uppercase">LLM-powered background agents cross-reference vector clusters, forming hypotheses, demanding evidence, and rejecting hallucinations before hitting your dashboard.</div>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Dark Metrics */}
+      <div className="relative w-full z-10 py-24 bg-[#020202]">
+        <div className="max-w-7xl mx-auto px-8 md:px-16 text-center">
+          <motion.h2 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="font-display text-4xl md:text-6xl font-bold uppercase mb-16"
+          >
+            Built for <span className="text-accent-primary">Scale.</span>
+          </motion.h2>
+          
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={staggerContainer}
+            className="grid grid-cols-2 md:grid-cols-4 gap-8"
+          >
+            <motion.div variants={fadeUp} className="flex flex-col items-center">
+              <Server size={48} className="text-accent-secondary mb-4" />
+              <div className="font-display text-5xl font-bold mb-2 text-white">0</div>
+              <div className="font-mono text-xs text-text-secondary uppercase tracking-widest">Downtime</div>
+            </motion.div>
+            <motion.div variants={fadeUp} className="flex flex-col items-center">
+              <Shield size={48} className="text-accent-primary mb-4" />
+              <div className="font-display text-5xl font-bold mb-2 text-white">100%</div>
+              <div className="font-mono text-xs text-text-secondary uppercase tracking-widest">Evidence Backed</div>
+            </motion.div>
+            <motion.div variants={fadeUp} className="flex flex-col items-center">
+              <Database size={48} className="text-text-secondary mb-4" />
+              <div className="font-display text-5xl font-bold mb-2 text-white">Sub-sec</div>
+              <div className="font-mono text-xs text-text-secondary uppercase tracking-widest">Vector Search</div>
+            </motion.div>
+            <motion.div variants={fadeUp} className="flex flex-col items-center">
+              <Network size={48} className="text-white mb-4" />
+              <div className="font-display text-5xl font-bold mb-2 text-white">Infinite</div>
+              <div className="font-mono text-xs text-text-secondary uppercase tracking-widest">Scale</div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <div className="relative w-full z-10 bg-accent-primary text-black py-32 brutal-border-t">
+        <div className="max-w-4xl mx-auto px-8 text-center flex flex-col items-center">
+          <h2 className="font-display text-6xl md:text-8xl font-bold uppercase tracking-tighter mb-8 leading-none">
+            Stop <br/> Guessing.
+          </h2>
+          <p className="font-mono text-sm md:text-base font-bold uppercase tracking-widest mb-12 opacity-80 max-w-xl">
+            The data is already there. You just need the right intelligence engine to piece it together.
+          </p>
+          <Link to="/dashboard" className="px-10 py-5 bg-black text-accent-primary font-display font-bold text-xl uppercase tracking-widest hover:bg-white hover:text-black transition-colors flex items-center gap-4 group">
+            Execute <ArrowRight size={24} className="group-hover:translate-x-2 transition-transform" />
+          </Link>
+        </div>
       </div>
     </div>
   );

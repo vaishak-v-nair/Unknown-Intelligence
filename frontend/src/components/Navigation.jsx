@@ -8,7 +8,7 @@ export default function Navigation() {
     <nav className="flex justify-between items-center px-8 py-4 bg-space-black brutal-border-b sticky top-0 z-50">
       <div className="flex items-center gap-3 font-display font-bold text-xl uppercase tracking-widest text-text-primary">
         <ShieldAlert className="text-accent-secondary" />
-        <span>Aurora Intelligence</span>
+        <span>Unknown Intelligence</span>
       </div>
       
       <div className="flex gap-6">
