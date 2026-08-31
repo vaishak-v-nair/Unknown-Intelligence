@@ -40,5 +40,3 @@ dataset/*
 # PRAXIS local memory (may contain project details — commit only after review)
 .praxis/
 
-.agents/
-docs/
