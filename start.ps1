@@ -15,6 +15,10 @@ Write-Host "==================================================" -ForegroundColor
 $Jobs = @()
 
 try {
+    # 0. Run Initial Data Ingestion (Peak Startup Setup)
+    Write-Host "[*] Bootstrapping Data Ingestion (fetching live events)..." -ForegroundColor Green
+    .\.venv\Scripts\python -m backend.ingest
+
     # 1. Start FastAPI Backend
     Write-Host "[*] Starting FastAPI Backend on port 8000..." -ForegroundColor Green
     $backendJob = Start-Job -ScriptBlock {

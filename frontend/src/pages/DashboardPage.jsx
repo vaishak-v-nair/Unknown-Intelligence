@@ -134,7 +134,7 @@ export default function DashboardPage() {
             </h2>
             <p className="text-text-secondary text-sm">
               {activeTab === 'anomalies' && "Cross-author convergence and anomaly detection feed."}
-              {activeTab === 'telemetry' && "Raw event stream directly from the zero-budget SQLite backend."}
+              {activeTab === 'telemetry' && "Raw event stream directly from the MongoDB backend."}
               {activeTab === 'agent' && "System metrics and background polling diagnostic."}
             </p>
           </div>
@@ -312,11 +312,11 @@ export default function DashboardPage() {
                     <Zap className="text-accent-primary" size={24} />
                     <div>
                       <div className="font-semibold text-lg">Model RAG Verification Active</div>
-                      <div className="text-sm text-text-secondary mt-1">LLM queries are correctly routed to the SQLite vector representations.</div>
+                      <div className="text-sm text-text-secondary mt-1">LLM queries are correctly routed to the Milvus vector database representations.</div>
                     </div>
                   </div>
                   <div className="px-4 py-2 bg-white/5 rounded-lg border border-white/10 font-mono text-sm text-text-primary">
-                    Zero-budget Architecture
+                    MongoDB + Milvus Architecture
                   </div>
                 </div>
 
