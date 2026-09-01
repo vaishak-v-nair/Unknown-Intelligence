@@ -1,124 +1,90 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700&family=Instrument+Serif:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-void: #030303;
-  --color-noise: #1A1A1A;
-  --color-noise-light: #2A2A2A;
-  --color-signal: #E0E0E0;
-  --color-signal-dim: #888888;
-  --color-tritium: #39FF14;
-  --color-laser: #FF003C;
+  --color-bone: #F7F7F5;
+  --color-graphite: #111111;
+  --color-graphite-soft: #333333;
+  --color-graphite-faint: #E5E5E0;
+  --color-ultramarine: #0400FF;
+  --color-vermilion: #FF2400;
 
-  --font-mono: 'JetBrains Mono', monospace;
-  --font-serif: 'Instrument Serif', serif;
-  
-  --shadow-glow: 0 0 20px rgba(57, 255, 20, 0.15);
-  --shadow-glow-red: 0 0 20px rgba(255, 0, 60, 0.15);
+  --font-serif: 'Newsreader', serif;
+  --font-mono: 'Space Mono', monospace;
 }
 
 @layer base {
   html {
     scroll-behavior: smooth;
-    background-color: var(--color-void);
+    background-color: var(--color-bone);
   }
   
   body {
-    @apply bg-void text-signal font-mono antialiased overflow-x-hidden;
+    @apply bg-bone text-graphite font-mono antialiased overflow-x-hidden;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Custom scrollbar for technical feel */
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-noise-light) var(--color-void);
+    scrollbar-width: none; /* Hide scrollbar for immersive feel */
   }
 
-  ::-webkit-scrollbar {
-    width: 4px;
-  }
-  ::-webkit-scrollbar-track {
-    background: var(--color-void);
-  }
-  ::-webkit-scrollbar-thumb {
-    background: var(--color-noise-light);
-  }
-  
   ::selection {
-    @apply bg-signal text-void;
+    @apply bg-ultramarine text-bone;
   }
 }
 
 @layer utilities {
-  /* The Signal Canvas Base */
   .canvas-container {
-    @apply relative w-full min-h-screen bg-void overflow-hidden flex flex-col;
+    @apply relative w-full min-h-screen bg-bone overflow-hidden flex flex-col;
   }
 
-  /* Sharp geometric borders */
-  .hairline-border {
-    @apply border border-noise;
+  /* Architectural Grid lines */
+  .grid-line-x {
+    @apply border-b border-graphite-faint;
   }
-  .hairline-border-b {
-    @apply border-b border-noise;
+  .grid-line-y {
+    @apply border-r border-graphite-faint;
   }
-  .hairline-border-r {
-    @apply border-r border-noise;
-  }
-  .hairline-border-l {
-    @apply border-l border-noise;
+  .grid-line-all {
+    @apply border border-graphite-faint;
   }
 
-  /* Structural elements */
-  .instrument-panel {
-    @apply bg-void border border-noise p-6 transition-colors duration-500 hover:border-noise-light;
-    border-radius: 0; /* Strictly NO rounded corners */
-  }
-
-  .instrument-panel-active {
-    @apply bg-noise/30 border-signal/30 shadow-glow;
-  }
-
-  /* Typography utilities */
-  .text-claim {
-    @apply font-serif text-5xl md:text-7xl leading-[0.9] tracking-tight;
+  /* Typography */
+  .text-editorial {
+    @apply font-serif text-5xl md:text-7xl leading-[0.95] tracking-tight;
   }
   
-  .text-data {
-    @apply font-mono text-xs tracking-widest uppercase text-signal-dim;
+  .text-editorial-sub {
+    @apply font-serif text-2xl md:text-3xl leading-snug tracking-tight text-graphite-soft;
   }
 
-  .text-value {
-    @apply font-mono text-sm tracking-tight text-signal;
+  .text-data-label {
+    @apply font-mono text-[10px] md:text-xs tracking-widest uppercase text-graphite-soft;
   }
 
-  .text-highlight {
-    @apply text-tritium;
+  .text-data-value {
+    @apply font-mono text-sm tracking-tight text-graphite;
   }
 
   /* Interactive Elements */
-  .instrument-button {
-    @apply inline-flex items-center justify-center px-6 py-3 font-mono text-xs uppercase tracking-widest border border-noise text-signal-dim transition-all duration-300 hover:border-signal hover:text-signal hover:bg-noise/50;
+  .forensic-button {
+    @apply inline-flex items-center justify-center px-8 py-4 font-mono text-xs uppercase tracking-widest border border-graphite text-graphite transition-all duration-300 hover:bg-graphite hover:text-bone;
     border-radius: 0;
   }
 
-  .instrument-button-primary {
-    @apply inline-flex items-center justify-center px-6 py-3 font-mono text-xs uppercase tracking-widest bg-signal text-void transition-all duration-300 hover:bg-white;
+  .forensic-button-primary {
+    @apply inline-flex items-center justify-center px-8 py-4 font-mono text-xs uppercase tracking-widest bg-ultramarine text-bone transition-all duration-300 hover:bg-graphite;
     border-radius: 0;
-  }
-
-  /* Canvas Noise Pattern */
-  .noise-bg {
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    opacity: 0.03;
-    pointer-events: none;
-    z-index: 10;
   }
   
-  .grid-bg {
-    background-image: 
-      linear-gradient(to right, #1A1A1A 1px, transparent 1px),
-      linear-gradient(to bottom, #1A1A1A 1px, transparent 1px);
-    background-size: 40px 40px;
-    background-position: center center;
+  .evidence-node {
+    @apply absolute p-4 bg-bone border border-graphite-faint shadow-sm cursor-pointer transition-colors duration-300 hover:border-ultramarine hover:text-ultramarine;
+    border-radius: 0;
+  }
+
+  /* Backgrounds */
+  .drafting-paper-bg {
+    background-image: radial-gradient(var(--color-graphite-faint) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: -12px -12px;
   }
 }

@@ -1,34 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { fetchFindings, fetchEvidence, fetchTelemetry, fetchSystemStatus } from '../api';
+import { Link } from 'react-router-dom';
+import { fetchFindings, fetchEvidence, fetchTelemetry } from '../api';
 
 export default function DashboardPage() {
   const [findings, setFindings] = useState([]);
   const [telemetry, setTelemetry] = useState([]);
-  const [sysStatus, setSysStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   
-  // Focus State: null = observing the field; finding object = investigating a specific discovery
   const [focusedDiscovery, setFocusedDiscovery] = useState(null);
   const [evidence, setEvidence] = useState([]);
   const [evidenceLoading, setEvidenceLoading] = useState(false);
 
+  // Pan and Zoom states for the Forensic Table
+  const constraintsRef = useRef(null);
+
   useEffect(() => {
     loadAllData();
-    const interval = setInterval(loadAllData, 30000); 
-    return () => clearInterval(interval);
   }, []);
 
   const loadAllData = async () => {
     try {
-      const [fData, tData, sData] = await Promise.all([
+      const [fData, tData] = await Promise.all([
         fetchFindings(),
         fetchTelemetry(),
-        fetchSystemStatus()
       ]);
       setFindings(fData);
       setTelemetry(tData);
-      setSysStatus(sData);
     } catch (error) {
       console.error("Failed to load dashboard data", error);
     } finally {
@@ -54,202 +52,202 @@ export default function DashboardPage() {
     setEvidence([]);
   };
 
-  // The Signal Canvas Background
-  const BackgroundNoise = () => (
-    <>
-      <div className="fixed inset-0 grid-bg opacity-30 z-0 pointer-events-none"></div>
-      <div className="fixed inset-0 noise-bg z-0"></div>
-    </>
-  );
-
-  // Top Nav (Minimalistic, data-focused)
-  const TopNav = () => (
-    <nav className="absolute top-0 left-0 w-full p-6 flex justify-between z-50">
-      <div className="flex flex-col">
-        <span className="font-mono text-sm tracking-widest text-signal">workspace.intelligence</span>
-        <span className="text-[10px] font-mono text-signal-dim uppercase mt-1">Status: {sysStatus ? 'Active' : 'Syncing'} | Nodes: {sysStatus?.total_events || 0}</span>
-      </div>
-      <div className="flex gap-4">
-        <div className="px-3 py-1 hairline-border text-data flex items-center gap-2">
-          <div className="w-1.5 h-1.5 bg-tritium animate-pulse"></div> Live
-        </div>
-      </div>
-    </nav>
+  // Background topology SVG for the Forensic Table
+  const ForensicGrid = () => (
+    <svg className="absolute inset-0 w-[200vw] h-[200vw] -left-[50vw] -top-[50vw] pointer-events-none opacity-5" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="forensicGrid" width="60" height="60" patternUnits="userSpaceOnUse">
+          <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#111111" strokeWidth="1"/>
+          <circle cx="0" cy="0" r="1.5" fill="#111111" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#forensicGrid)" />
+    </svg>
   );
 
   return (
-    <div className="canvas-container relative text-signal h-screen overflow-hidden">
-      <BackgroundNoise />
-      <TopNav />
+    <div className="canvas-container relative text-graphite h-screen w-screen overflow-hidden cursor-grab active:cursor-grabbing">
+      <div className="fixed inset-0 drafting-paper-bg z-0 pointer-events-none"></div>
 
-      {/* Main Workspace Area */}
-      <main className="absolute inset-0 pt-24 pb-6 px-6 flex flex-col md:flex-row gap-6 z-10">
+      {/* Top Bar - Minimalist Data Header */}
+      <header className="fixed top-0 left-0 w-full p-6 flex justify-between items-start z-50 pointer-events-none">
+        <div className="grid-line-all bg-bone px-4 py-2 pointer-events-auto">
+          <Link to="/" className="text-data-label font-bold hover:text-ultramarine transition-colors">Unknown Intelligence</Link>
+          <div className="text-[10px] font-mono text-graphite-soft mt-1 flex items-center gap-2">
+             <div className="w-1.5 h-1.5 bg-ultramarine rounded-full animate-pulse"></div>
+             Workspace Online
+          </div>
+        </div>
         
-        {/* Left Column: The Central Field (70%) */}
-        <div className="flex-[3] relative border border-transparent">
+        <div className="grid-line-all bg-bone px-4 py-2 text-right pointer-events-auto">
+          <div className="text-data-label">Anomalies Detected</div>
+          <div className="text-data-value">{findings.length}</div>
+        </div>
+      </header>
+
+      {/* INFINITE PANNING CANVAS (The Forensic Table) */}
+      <div className="absolute inset-0 z-10" ref={constraintsRef}>
+        <motion.div 
+          drag 
+          dragConstraints={constraintsRef}
+          className="w-full h-full flex items-center justify-center relative"
+        >
+          <ForensicGrid />
+
           <AnimatePresence mode="wait">
-            
-            {/* STATE 1: Observational Field (List of emerging patterns) */}
+            {/* VIEW 1: The Board (List of claims pinned to board) */}
             {!focusedDiscovery && (
               <motion.div 
-                key="observational-field"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }}
-                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                className="w-full h-full flex flex-col justify-center max-w-4xl mx-auto"
+                key="board"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.5 }}
+                className="absolute flex flex-wrap gap-12 p-20 justify-center items-center max-w-7xl"
               >
-                <div className="text-data mb-6 border-b border-noise pb-4">Emerging System Patterns</div>
-                <div className="flex flex-col gap-1">
-                  {loading ? (
-                    <div className="text-data animate-pulse">Scanning topology...</div>
-                  ) : findings.length === 0 ? (
-                    <div className="font-serif text-3xl text-signal-dim">No anomalies detected in current timeline.</div>
-                  ) : (
-                    findings.map((finding) => (
-                      <div 
-                        key={finding.id} 
-                        onClick={() => handleInvestigate(finding)}
-                        className="group flex flex-col py-6 hairline-border-b cursor-pointer transition-all hover:bg-noise/20 px-4 -mx-4"
-                      >
-                        <div className="flex justify-between items-baseline mb-2">
-                          <span className="font-mono text-xs text-laser tracking-widest">{finding.id}</span>
-                          <span className="font-mono text-xs text-signal-dim">{(finding.significance_score * 100).toFixed(0)}% Confidence</span>
-                        </div>
-                        <h2 className="font-serif text-3xl md:text-4xl leading-tight text-signal group-hover:text-white transition-colors">
-                          {finding.claim}
-                        </h2>
-                      </div>
-                    ))
-                  )}
-                </div>
+                {loading ? (
+                  <div className="text-data-label bg-bone p-4 grid-line-all">Scanning system topology...</div>
+                ) : findings.map((finding, idx) => (
+                  <div 
+                    key={finding.id} 
+                    onClick={() => handleInvestigate(finding)}
+                    className="grid-line-all bg-bone p-10 max-w-xl cursor-pointer hover:border-ultramarine transition-colors relative group"
+                    style={{
+                       // Slight scatter effect to feel like paper on a desk
+                       transform: `rotate(${idx % 2 === 0 ? '-1deg' : '1.5deg'}) translateY(${idx * 10}px)`
+                    }}
+                  >
+                    <div className="absolute -left-2 -top-2 w-4 h-4 bg-bone border border-graphite-faint group-hover:bg-ultramarine transition-colors"></div>
+                    <div className="flex justify-between items-baseline mb-6 border-b border-graphite-faint pb-4">
+                      <span className="text-data-label text-graphite-soft tracking-widest">{finding.id}</span>
+                      <span className="text-data-label text-ultramarine">{(finding.significance_score * 100).toFixed(1)}% Confidence</span>
+                    </div>
+                    <h2 className="text-editorial-sub text-graphite mb-4 group-hover:text-ultramarine transition-colors">
+                      {finding.claim}
+                    </h2>
+                    <div className="text-data-label text-graphite-soft mt-8 flex items-center gap-2">
+                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                       Click to view evidence graph
+                    </div>
+                  </div>
+                ))}
               </motion.div>
             )}
 
-            {/* STATE 2: Investigation View (Discovery at center, shattering into evidence) */}
+            {/* VIEW 2: The Constellation (Evidence Graph) */}
             {focusedDiscovery && (
               <motion.div 
-                key="investigation-field"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                key="evidence"
+                initial={{ opacity: 0, scale: 1.1 }}
+                animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                className="w-full h-full relative flex flex-col"
+                transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                className="absolute inset-0 flex items-center justify-center"
               >
-                <button 
-                  onClick={handleClose}
-                  className="absolute -top-12 left-0 text-data hover:text-white flex items-center gap-2 z-50 uppercase tracking-widest"
-                >
-                  [Esc] Return to Field
-                </button>
+                {/* SVG Connections (The Topographical Snap) */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" style={{ overflow: 'visible' }}>
+                  {evidence.map((_, i) => {
+                     // Calculate radial positions for evidence nodes to draw rigid geometric lines
+                     const angle = (i / evidence.length) * Math.PI * 2;
+                     const radius = window.innerWidth > 768 ? 350 : 200;
+                     const x2 = `calc(50% + ${Math.cos(angle) * radius}px)`;
+                     const y2 = `calc(50% + ${Math.sin(angle) * radius}px)`;
+                     
+                     return (
+                        <motion.line 
+                          key={`line-${i}`}
+                          initial={{ pathLength: 0, opacity: 0 }}
+                          animate={{ pathLength: 1, opacity: 1 }}
+                          transition={{ delay: 0.5 + (i * 0.1), duration: 0.8 }}
+                          x1="50%" y1="50%" x2={x2} y2={y2} 
+                          stroke="var(--color-ultramarine)" strokeWidth="1" strokeDasharray="4 4"
+                        />
+                     )
+                  })}
+                </svg>
 
-                {/* The Claim (Pushed back into Z-space via scale and dimming) */}
-                <motion.div 
-                  initial={{ scale: 1.2, opacity: 0, y: 50 }}
-                  animate={{ scale: 0.85, opacity: 0.4, y: 0 }}
-                  transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-                  className="text-center mt-12 mb-20 relative z-0"
-                >
-                  <div className="font-mono text-xs text-laser tracking-widest mb-4">VERIFIED CLAIM</div>
-                  <h2 className="font-serif text-5xl md:text-6xl leading-[1.1] text-signal max-w-4xl mx-auto">
+                {/* Central Claim */}
+                <div className="grid-line-all bg-bone p-12 max-w-2xl relative z-10 text-center shadow-2xl shadow-bone/50">
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-ultramarine text-bone px-4 py-1 text-[10px] font-mono uppercase tracking-widest">
+                     Verified Discovery
+                  </div>
+                  <h2 className="text-editorial text-graphite leading-tight mb-8">
                     {focusedDiscovery.claim}
                   </h2>
-                </motion.div>
-
-                {/* The Evidence Constellation (Orbits forward) */}
-                <div className="flex-1 relative z-10 w-full max-w-5xl mx-auto">
-                  <div className="text-data border-b border-noise pb-2 mb-8">Constellation / Evidence Graph</div>
-                  
-                  {evidenceLoading ? (
-                    <div className="text-data animate-pulse flex h-64 items-center justify-center">Decrypting evidence nodes...</div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
-                      {/* Connecting lines SVG background */}
-                      <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20" style={{ zIndex: -1 }}>
-                        <line x1="20%" y1="0%" x2="50%" y2="100%" stroke="var(--color-signal)" strokeWidth="0.5" />
-                        <line x1="80%" y1="0%" x2="50%" y2="100%" stroke="var(--color-signal)" strokeWidth="0.5" />
-                      </svg>
-
-                      {evidence.map((ev, i) => (
-                        <motion.div 
-                          key={i}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.2 + (i * 0.1), duration: 0.6 }}
-                          className="instrument-panel backdrop-blur-md bg-void/80 hover:bg-void"
-                        >
-                          <div className="flex justify-between mb-4 border-b border-noise pb-2">
-                            <span className="font-mono text-xs text-signal-dim uppercase">{ev.author}</span>
-                            <span className="font-mono text-xs text-signal-dim">{ev.timestamp.substring(0, 10)}</span>
-                          </div>
-                          <div className="font-mono text-sm text-signal leading-relaxed whitespace-pre-wrap">
-                            {ev.content}
-                          </div>
-                        </motion.div>
-                      ))}
-
-                      {evidence.length === 0 && (
-                        <div className="col-span-2 text-center text-signal-dim font-mono text-sm py-12">
-                          Evidence graph is fragmented. Awaiting further telemetry.
-                        </div>
-                      )}
+                  <div className="flex justify-center gap-8 border-t border-graphite-faint pt-6">
+                    <div>
+                      <div className="text-data-label">Status</div>
+                      <div className="text-data-value">{focusedDiscovery.status}</div>
                     </div>
-                  )}
-
-                  {/* Falsification / Alternatives Panel */}
-                  {focusedDiscovery.alternative_explanations && (
-                    <motion.div 
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.8 }}
-                      className="mt-12 instrument-panel border-laser/30 bg-laser/5"
-                    >
-                      <div className="font-mono text-xs text-laser uppercase mb-4 tracking-widest">Self-Falsification Attempt</div>
-                      <div className="font-serif text-xl text-signal/80 leading-relaxed">
-                        {focusedDiscovery.alternative_explanations}
-                      </div>
-                    </motion.div>
-                  )}
+                    <div>
+                      <div className="text-data-label">Detection</div>
+                      <div className="text-data-value">{focusedDiscovery.created_at.substring(0, 10)}</div>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={handleClose}
+                    className="mt-8 font-mono text-xs text-graphite-soft hover:text-ultramarine transition-colors uppercase tracking-widest border-b border-transparent hover:border-ultramarine"
+                  >
+                    ← Return to Desk
+                  </button>
                 </div>
+
+                {/* Orbiting Evidence Nodes */}
+                {evidence.map((ev, i) => {
+                   const angle = (i / evidence.length) * Math.PI * 2;
+                   const radius = window.innerWidth > 768 ? 350 : 200;
+                   const x = Math.cos(angle) * radius;
+                   const y = Math.sin(angle) * radius;
+
+                   return (
+                     <motion.div 
+                       key={`ev-${i}`}
+                       initial={{ opacity: 0, x: 0, y: 0 }}
+                       animate={{ opacity: 1, x, y }}
+                       transition={{ delay: 0.2 + (i * 0.1), duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                       className="evidence-node max-w-xs z-10 flex flex-col"
+                       style={{ position: 'absolute' }}
+                     >
+                       <div className="flex justify-between items-center mb-3 border-b border-graphite-faint pb-2">
+                         <span className="text-[10px] font-mono uppercase font-bold">{ev.author}</span>
+                         <span className="text-[10px] font-mono text-graphite-soft">{ev.timestamp.substring(0, 10)}</span>
+                       </div>
+                       <div className="text-xs font-mono text-graphite leading-relaxed whitespace-pre-wrap">
+                         {ev.content}
+                       </div>
+                     </motion.div>
+                   )
+                })}
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        </motion.div>
+      </div>
 
-        {/* Right Column: Telemetry Ticker (Peripheral observation) */}
-        <div className="flex-1 max-w-sm h-full flex flex-col border-l border-noise pl-6 relative z-10 hidden lg:flex">
-          <div className="font-mono text-xs text-signal-dim uppercase tracking-widest mb-6 border-b border-noise pb-4">
-            Raw Telemetry Stream
-          </div>
-          
-          <div className="flex-1 overflow-y-auto space-y-4 pr-2 pb-24" style={{ scrollbarWidth: 'none' }}>
-            {loading && <div className="text-data animate-pulse">Connecting to stream...</div>}
-            
-            <AnimatePresence>
-              {telemetry.map((evt, i) => (
-                <motion.div 
-                  key={evt.id}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  className="text-xs font-mono border-l-2 border-noise pl-3 py-1 opacity-70 hover:opacity-100 transition-opacity"
-                >
-                  <div className="flex justify-between text-signal-dim mb-1">
-                    <span>{evt.event_type}</span>
-                    <span>{evt.timestamp.substring(11, 19)}</span>
-                  </div>
-                  <div className="text-signal truncate">{evt.entity_name || 'System Context'}</div>
-                  <div className="text-signal-dim truncate mt-1">{evt.content_snippet}</div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-            
-            {/* Fade out bottom of ticker */}
-            <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-void to-transparent pointer-events-none"></div>
-          </div>
-        </div>
-
-      </main>
+      {/* Bottom Telemetry Ticker (Fixed) */}
+      <footer className="fixed bottom-0 left-0 w-full bg-bone grid-line-x border-t z-50 pointer-events-none flex h-10 overflow-hidden">
+         <div className="bg-graphite text-bone text-data-label px-6 flex items-center pointer-events-auto shrink-0 whitespace-nowrap z-10 shadow-[10px_0_10px_rgba(247,247,245,1)]">
+           LIVE TELEMETRY
+         </div>
+         <div className="flex items-center gap-12 animate-[marquee_30s_linear_infinite] px-12 opacity-60">
+            {telemetry.map(t => (
+              <div key={t.id} className="flex items-center gap-3 whitespace-nowrap">
+                <span className="text-[10px] font-mono bg-graphite-faint px-1 text-graphite">{t.event_type}</span>
+                <span className="text-xs font-mono">{t.entity_name}</span>
+                <span className="text-[10px] font-mono text-graphite-soft truncate max-w-[200px]">{t.content_snippet}</span>
+              </div>
+            ))}
+            {telemetry.length === 0 && <span className="text-xs font-mono">Awaiting telemetry streams...</span>}
+         </div>
+      </footer>
+      
+      {/* CSS for marquee */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes marquee {
+          0% { transform: translateX(100%); }
+          100% { transform: translateX(-100%); }
+        }
+      `}} />
     </div>
   );
 }
