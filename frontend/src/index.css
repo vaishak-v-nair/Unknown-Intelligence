@@ -1,58 +1,118 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-brand-primary: #5741D9;
-  --color-brand-secondary: #8B5CF6;
-  --color-brand-light: #F5F3FF;
+  --color-background: #FAFAFA;
+  --color-foreground: #111111;
   
-  --color-surface-white: #ffffff;
-  --color-surface-gray: #f8fafc;
+  --color-muted: #F4F4F5;
+  --color-muted-foreground: #71717A;
   
-  --color-text-primary: #0f172a;
-  --color-text-secondary: #64748b;
-  --color-text-muted: #94a3b8;
+  --color-border: #E4E4E7;
+  --color-border-hover: #D4D4D8;
   
-  --font-sans: 'Inter', sans-serif;
-  --font-display: 'Playfair Display', serif;
+  --color-accent: #000000;
+  --color-accent-foreground: #FFFFFF;
+  
+  --color-brand-blue: #0070F3;
+  --color-brand-blue-light: #E6F0FD;
+  
+  --color-success: #007A5A;
+  --color-success-bg: #E6F6F1;
+  
+  --color-warning: #B7791F;
+  --color-warning-bg: #FEF7EA;
+  
+  --color-danger: #E53E3E;
+  --color-danger-bg: #FEEBC8;
+
+  --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+  --shadow-float: 0 0 0 1px rgba(0,0,0,0.03), 0 2px 12px rgba(0,0,0,0.04), 0 16px 32px rgba(0,0,0,0.04);
 }
 
 @layer base {
-  body {
-    @apply bg-surface-gray text-text-primary font-sans antialiased overflow-x-hidden;
+  html {
+    scroll-behavior: smooth;
   }
   
-  ::selection {
-    @apply bg-brand-primary/20 text-brand-primary;
+  body {
+    @apply bg-background text-foreground font-sans antialiased overflow-x-hidden selection:bg-brand-blue/20 selection:text-brand-blue;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
   }
 }
 
 @layer utilities {
-  .glass-card {
-    @apply bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl;
+  .structural-card {
+    @apply bg-white border border-border rounded-xl shadow-sm transition-all duration-300;
+  }
+  
+  .structural-card:hover {
+    @apply shadow-md border-border-hover;
   }
 
-  .saas-card {
-    @apply bg-white border border-slate-200 shadow-sm rounded-xl;
+  .bento-card {
+    @apply bg-white border border-border rounded-2xl shadow-sm overflow-hidden flex flex-col;
+  }
+  
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border;
+  }
+  
+  .badge-neutral {
+    @apply bg-muted text-foreground border-border;
   }
 
   .badge-success {
-    @apply text-emerald-700 bg-emerald-50 px-2.5 py-1 text-xs font-semibold rounded-full border border-emerald-200;
+    @apply bg-success-bg text-success border-success/20;
   }
   
   .badge-warning {
-    @apply text-amber-700 bg-amber-50 px-2.5 py-1 text-xs font-semibold rounded-full border border-amber-200;
+    @apply bg-warning-bg text-warning border-warning/20;
   }
   
   .badge-danger {
-    @apply text-rose-700 bg-rose-50 px-2.5 py-1 text-xs font-semibold rounded-full border border-rose-200;
-  }
-
-  .saas-button {
-    @apply inline-flex items-center justify-center bg-brand-primary text-white px-6 py-3 font-medium text-sm rounded-lg transition-all duration-200 hover:bg-brand-primary/90 hover:shadow-md hover:-translate-y-0.5;
+    @apply bg-danger-bg text-danger border-danger/20;
   }
   
-  .saas-button-outline {
-    @apply inline-flex items-center justify-center border border-slate-200 bg-white text-text-primary px-6 py-3 font-medium text-sm rounded-lg transition-all duration-200 hover:bg-slate-50 hover:border-slate-300;
+  .badge-blue {
+    @apply bg-brand-blue-light text-brand-blue border-brand-blue/20;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-4 py-2 bg-foreground text-background font-medium rounded-lg hover:bg-foreground/90 transition-colors shadow-sm text-sm;
+  }
+  
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-4 py-2 bg-white text-foreground border border-border font-medium rounded-lg hover:bg-muted transition-colors shadow-sm text-sm;
+  }
+  
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-muted font-medium rounded-lg transition-colors text-sm;
+  }
+
+  .mesh-bg {
+    background-color: #fafafa;
+    background-image: 
+      radial-gradient(at 0% 0%, hsla(210,100%,95%,1) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(280,100%,95%,1) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(350,100%,95%,1) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(150,100%,95%,1) 0px, transparent 50%);
+  }
+
+  .dot-pattern {
+    background-image: radial-gradient(#e4e4e7 1px, transparent 1px);
+    background-size: 20px 20px;
   }
 }
