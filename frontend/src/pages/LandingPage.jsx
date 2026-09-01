@@ -1,172 +1,138 @@
-import { motion } from "framer-motion";
+import React, { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Activity, GitCommit, GitMerge, FileCode2, Command } from "lucide-react";
 
 export default function LandingPage() {
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
+  const containerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"]
+  });
 
-  const item = {
-    hidden: { opacity: 0, y: 10 },
-    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 20 } }
-  };
+  // Hero Decryption Effect (simulated via opacity/blur)
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.1], [1, 0]);
+  const heroY = useTransform(scrollYProgress, [0, 0.1], [0, -100]);
+
+  // Section 1: Noise
+  const noiseOpacity = useTransform(scrollYProgress, [0.1, 0.2, 0.3], [0, 1, 0]);
+  const noiseScale = useTransform(scrollYProgress, [0.1, 0.3], [0.8, 1.2]);
+
+  // Section 2: Signals
+  const signalsOpacity = useTransform(scrollYProgress, [0.3, 0.4, 0.5], [0, 1, 0]);
+  
+  // Section 3: Emergence
+  const emergenceOpacity = useTransform(scrollYProgress, [0.5, 0.6, 0.7], [0, 1, 0]);
+  
+  // Section 4: Discovery (Final CTA)
+  const discoveryOpacity = useTransform(scrollYProgress, [0.7, 0.8, 1], [0, 1, 1]);
 
   return (
-    <div className="relative w-full min-h-screen bg-background dot-pattern flex flex-col font-sans text-foreground">
-      
-      {/* Navigation */}
-      <nav className="w-full max-w-6xl mx-auto px-6 py-6 flex items-center justify-between z-10">
-        <div className="flex items-center gap-2">
-          <Command size={20} className="text-foreground" />
-          <span className="font-semibold tracking-tight text-lg">UnknownUnknowns</span>
+    <div ref={containerRef} className="canvas-container h-[500vh] relative">
+      <div className="fixed inset-0 grid-bg opacity-30 z-0 pointer-events-none"></div>
+      <div className="fixed inset-0 noise-bg z-10"></div>
+
+      {/* Static Navigation */}
+      <nav className="fixed top-0 left-0 w-full p-6 flex items-center justify-between z-50 mix-blend-difference">
+        <div className="font-mono text-sm tracking-widest uppercase text-signal">
+          Unknown Intelligence <span className="text-signal-dim ml-2">[v3.0]</span>
         </div>
-        
-        <div className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-          <a href="#product" className="hover:text-foreground transition-colors">Platform</a>
-          <a href="#solutions" className="hover:text-foreground transition-colors">Engine</a>
-          <a href="#pricing" className="hover:text-foreground transition-colors">Enterprise</a>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <a href="#" className="text-sm font-medium text-muted-foreground hover:text-foreground hidden sm:block">Log in</a>
-          <Link to="/dashboard" className="btn-primary">
-            Initialize Engine
-          </Link>
+        <div className="flex gap-8 text-data">
+          <a href="#" className="hover:text-signal transition-colors">Manifesto</a>
+          <a href="#" className="hover:text-signal transition-colors">Telemetry</a>
+          <Link to="/dashboard" className="text-tritium hover:text-white transition-colors">Initialize</Link>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <main className="flex-1 w-full max-w-6xl mx-auto px-6 pt-24 pb-32">
+      {/* Canvas Elements (The Sticky Viewport) */}
+      <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden z-20 pointer-events-none">
+        
+        {/* HERO: The Unknown */}
         <motion.div 
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="max-w-3xl"
+          style={{ opacity: heroOpacity, y: heroY }}
+          className="absolute inset-0 flex flex-col items-center justify-center text-center px-6"
         >
-          <motion.div variants={item} className="mb-6 flex items-center gap-2">
-            <span className="badge badge-neutral px-3 py-1 bg-white">
-              <span className="w-1.5 h-1.5 rounded-full bg-brand-blue mr-2 animate-pulse"></span>
-              Systemic Health Engine v3.0
-            </span>
-          </motion.div>
-          
-          <motion.h1 variants={item} className="text-5xl md:text-7xl font-bold tracking-tighter leading-[1.05] mb-6">
-            Discover what your team <span className="text-muted-foreground">can't see.</span>
-          </motion.h1>
-          
-          <motion.p variants={item} className="text-lg md:text-xl text-muted-foreground mb-10 leading-relaxed max-w-2xl font-medium">
-            A proactive data orchestration engine that monitors GitHub repositories. It vectorizes and synthesizes raw telemetry to surface hidden anomalies before they become critical failures.
-          </motion.p>
-          
-          <motion.div variants={item} className="flex flex-col sm:flex-row gap-3">
-            <Link to="/dashboard" className="btn-primary text-base px-6 py-3">
-              Start analysis <ArrowRight size={16} className="ml-2" />
+          <div className="text-data mb-8">System Status: Observational Mode</div>
+          <h1 className="text-claim text-white max-w-4xl mx-auto mb-12">
+            Find what your system is becoming <br/>
+            <span className="italic text-signal-dim">before it becomes obvious.</span>
+          </h1>
+          <div className="text-data animate-pulse mt-12">Scroll to observe</div>
+        </motion.div>
+
+        {/* STAGE 1: NOISE */}
+        <motion.div 
+          style={{ opacity: noiseOpacity, scale: noiseScale }}
+          className="absolute inset-0 flex items-center justify-center"
+        >
+          <div className="text-center">
+            <div className="font-mono text-9xl text-noise-light tracking-tighter mb-4">NOISE</div>
+            <p className="text-data max-w-md mx-auto text-signal-dim">
+              14,203 events. Isolated commits. Unrelated discussions. The raw topology of your engineering effort before synthesis.
+            </p>
+          </div>
+          {/* Simulated noise particles via CSS */}
+          <div className="absolute inset-0 flex flex-wrap gap-4 opacity-20 justify-center items-center content-center pointer-events-none">
+             {Array.from({length: 40}).map((_, i) => (
+                <div key={i} className="w-1 h-1 bg-signal rounded-none" style={{ marginLeft: Math.random() * 100, marginTop: Math.random() * 100 }}></div>
+             ))}
+          </div>
+        </motion.div>
+
+        {/* STAGE 2: SIGNALS */}
+        <motion.div 
+          style={{ opacity: signalsOpacity }}
+          className="absolute inset-0 flex items-center justify-center"
+        >
+          <div className="text-center z-10 relative">
+            <div className="font-mono text-9xl text-signal-dim tracking-tighter mb-4 blur-[1px]">SIGNALS</div>
+            <p className="text-data max-w-md mx-auto text-signal">
+              Temporal drift detected. Isolated authors are mathematically converging on the same unseen problem.
+            </p>
+          </div>
+          {/* Simulated signals (lines connecting) */}
+          <svg className="absolute inset-0 w-full h-full opacity-30">
+             <line x1="20%" y1="30%" x2="50%" y2="50%" stroke="white" strokeWidth="0.5" />
+             <line x1="80%" y1="20%" x2="50%" y2="50%" stroke="white" strokeWidth="0.5" />
+             <line x1="30%" y1="80%" x2="50%" y2="50%" stroke="white" strokeWidth="0.5" />
+          </svg>
+        </motion.div>
+
+        {/* STAGE 3: EMERGENCE */}
+        <motion.div 
+          style={{ opacity: emergenceOpacity }}
+          className="absolute inset-0 flex items-center justify-center"
+        >
+          <div className="text-center z-10 bg-void/80 p-12 hairline-border backdrop-blur-sm">
+            <div className="font-mono text-7xl text-signal tracking-tighter mb-6">EMERGENCE</div>
+            <div className="h-px w-full bg-noise mb-6"></div>
+            <p className="font-serif text-3xl max-w-lg mx-auto text-signal leading-tight">
+              An architectural fracture is forming between the state manager and the routing layer.
+            </p>
+            <div className="text-data mt-6 text-laser animate-pulse">EVIDENCE FOCUSED. FALSIFICATION FAILED.</div>
+          </div>
+          <svg className="absolute inset-0 w-full h-full opacity-100">
+             <polygon points="50%,20% 80%,50% 50%,80% 20%,50%" fill="none" stroke="#E0E0E0" strokeWidth="1" />
+             <polygon points="50%,30% 70%,50% 50%,70% 30%,50%" fill="none" stroke="#FF003C" strokeWidth="1" />
+          </svg>
+        </motion.div>
+
+        {/* STAGE 4: DISCOVERY (CTA) */}
+        <motion.div 
+          style={{ opacity: discoveryOpacity }}
+          className="absolute inset-0 flex flex-col items-center justify-center pointer-events-auto"
+        >
+          <h2 className="text-claim text-white mb-12">See the invisible.</h2>
+          <div className="flex gap-4">
+            <Link to="/dashboard" className="instrument-button-primary">
+              Initialize Workspace
             </Link>
-            <button className="btn-secondary text-base px-6 py-3">
-              Read the documentation
+            <button className="instrument-button">
+              View Sample Telemetry
             </button>
-          </motion.div>
+          </div>
         </motion.div>
 
-        {/* Technical Bento Grid */}
-        <motion.div 
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="mt-32 grid grid-cols-1 md:grid-cols-3 gap-4"
-        >
-          {/* Card 1 */}
-          <motion.div variants={item} className="bento-card col-span-1 md:col-span-2 p-8 h-80 bg-white relative group">
-            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-              <Activity size={120} />
-            </div>
-            <div className="relative z-10 flex flex-col h-full justify-between">
-              <div>
-                <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center border border-border mb-4">
-                  <Activity size={20} className="text-foreground" />
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Temporal Drift Detection</h3>
-                <p className="text-muted-foreground text-sm max-w-md leading-relaxed">
-                  We calculate historical baselines for every subsystem. When file modification rates spike beyond normal standard deviations, our engine flags it instantly.
-                </p>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Card 2 */}
-          <motion.div variants={item} className="bento-card col-span-1 p-8 h-80 bg-foreground text-white relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity text-white">
-              <GitMerge size={120} />
-            </div>
-            <div className="relative z-10 flex flex-col h-full justify-between">
-              <div>
-                <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center border border-white/20 mb-4 text-white">
-                  <GitMerge size={20} />
-                </div>
-                <h3 className="text-xl font-semibold mb-2 text-white">Independent Convergence</h3>
-                <p className="text-white/70 text-sm leading-relaxed">
-                  Automatically detects when distinct authors mathematically converge on correlated problems without explicit cross-communication.
-                </p>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Card 3 */}
-          <motion.div variants={item} className="bento-card col-span-1 p-8 h-64 bg-white">
-             <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center border border-border mb-4">
-                <FileCode2 size={20} className="text-foreground" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Zero Hallucinations</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                Every generated hypothesis is strictly grounded in verifiable PRs, commits, and issue timestamps. If it can't be cited, it is rejected.
-              </p>
-          </motion.div>
-
-          {/* Card 4 */}
-          <motion.div variants={item} className="bento-card col-span-1 p-8 h-64 bg-white">
-             <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center border border-border mb-4">
-                <Command size={20} className="text-foreground" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Rigorous Falsification</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                Our autonomous investigator agent is designed as a skeptic. It deliberately searches for contradictory evidence before verifying any claim.
-              </p>
-          </motion.div>
-
-          {/* Card 5 */}
-          <motion.div variants={item} className="bento-card col-span-1 p-8 h-64 bg-white">
-             <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center border border-border mb-4">
-                <GitCommit size={20} className="text-foreground" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">High-Density Telemetry</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                A highly structured, monospaced-heavy interface designed for deep code inspection and rapid engineering discovery.
-              </p>
-          </motion.div>
-        </motion.div>
-      </main>
-
-      {/* Footer */}
-      <footer className="w-full border-t border-border bg-white mt-12 py-12">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between text-sm text-muted-foreground">
-          <div className="flex items-center gap-2 mb-4 md:mb-0">
-            <Command size={16} />
-            <span className="font-semibold text-foreground">UnknownUnknowns</span>
-          </div>
-          <div className="flex gap-6">
-            <a href="#" className="hover:text-foreground">GitHub</a>
-            <a href="#" className="hover:text-foreground">Documentation</a>
-            <a href="#" className="hover:text-foreground">Privacy</a>
-          </div>
-        </div>
-      </footer>
+      </div>
     </div>
   );
 }

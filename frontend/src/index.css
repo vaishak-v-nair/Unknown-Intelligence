@@ -1,118 +1,124 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700&family=Instrument+Serif:ital@0;1&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-background: #FAFAFA;
-  --color-foreground: #111111;
-  
-  --color-muted: #F4F4F5;
-  --color-muted-foreground: #71717A;
-  
-  --color-border: #E4E4E7;
-  --color-border-hover: #D4D4D8;
-  
-  --color-accent: #000000;
-  --color-accent-foreground: #FFFFFF;
-  
-  --color-brand-blue: #0070F3;
-  --color-brand-blue-light: #E6F0FD;
-  
-  --color-success: #007A5A;
-  --color-success-bg: #E6F6F1;
-  
-  --color-warning: #B7791F;
-  --color-warning-bg: #FEF7EA;
-  
-  --color-danger: #E53E3E;
-  --color-danger-bg: #FEEBC8;
+  --color-void: #030303;
+  --color-noise: #1A1A1A;
+  --color-noise-light: #2A2A2A;
+  --color-signal: #E0E0E0;
+  --color-signal-dim: #888888;
+  --color-tritium: #39FF14;
+  --color-laser: #FF003C;
 
-  --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-serif: 'Instrument Serif', serif;
   
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
-  --shadow-float: 0 0 0 1px rgba(0,0,0,0.03), 0 2px 12px rgba(0,0,0,0.04), 0 16px 32px rgba(0,0,0,0.04);
+  --shadow-glow: 0 0 20px rgba(57, 255, 20, 0.15);
+  --shadow-glow-red: 0 0 20px rgba(255, 0, 60, 0.15);
 }
 
 @layer base {
   html {
     scroll-behavior: smooth;
+    background-color: var(--color-void);
   }
   
   body {
-    @apply bg-background text-foreground font-sans antialiased overflow-x-hidden selection:bg-brand-blue/20 selection:text-brand-blue;
+    @apply bg-void text-signal font-mono antialiased overflow-x-hidden;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Custom scrollbar for technical feel */
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-noise-light) var(--color-void);
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-void);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-noise-light);
   }
   
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold tracking-tight;
+  ::selection {
+    @apply bg-signal text-void;
   }
 }
 
 @layer utilities {
-  .structural-card {
-    @apply bg-white border border-border rounded-xl shadow-sm transition-all duration-300;
-  }
-  
-  .structural-card:hover {
-    @apply shadow-md border-border-hover;
+  /* The Signal Canvas Base */
+  .canvas-container {
+    @apply relative w-full min-h-screen bg-void overflow-hidden flex flex-col;
   }
 
-  .bento-card {
-    @apply bg-white border border-border rounded-2xl shadow-sm overflow-hidden flex flex-col;
+  /* Sharp geometric borders */
+  .hairline-border {
+    @apply border border-noise;
   }
-  
-  .badge {
-    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border;
+  .hairline-border-b {
+    @apply border-b border-noise;
   }
-  
-  .badge-neutral {
-    @apply bg-muted text-foreground border-border;
+  .hairline-border-r {
+    @apply border-r border-noise;
   }
-
-  .badge-success {
-    @apply bg-success-bg text-success border-success/20;
-  }
-  
-  .badge-warning {
-    @apply bg-warning-bg text-warning border-warning/20;
-  }
-  
-  .badge-danger {
-    @apply bg-danger-bg text-danger border-danger/20;
-  }
-  
-  .badge-blue {
-    @apply bg-brand-blue-light text-brand-blue border-brand-blue/20;
+  .hairline-border-l {
+    @apply border-l border-noise;
   }
 
-  .btn-primary {
-    @apply inline-flex items-center justify-center px-4 py-2 bg-foreground text-background font-medium rounded-lg hover:bg-foreground/90 transition-colors shadow-sm text-sm;
-  }
-  
-  .btn-secondary {
-    @apply inline-flex items-center justify-center px-4 py-2 bg-white text-foreground border border-border font-medium rounded-lg hover:bg-muted transition-colors shadow-sm text-sm;
-  }
-  
-  .btn-ghost {
-    @apply inline-flex items-center justify-center px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-muted font-medium rounded-lg transition-colors text-sm;
+  /* Structural elements */
+  .instrument-panel {
+    @apply bg-void border border-noise p-6 transition-colors duration-500 hover:border-noise-light;
+    border-radius: 0; /* Strictly NO rounded corners */
   }
 
-  .mesh-bg {
-    background-color: #fafafa;
+  .instrument-panel-active {
+    @apply bg-noise/30 border-signal/30 shadow-glow;
+  }
+
+  /* Typography utilities */
+  .text-claim {
+    @apply font-serif text-5xl md:text-7xl leading-[0.9] tracking-tight;
+  }
+  
+  .text-data {
+    @apply font-mono text-xs tracking-widest uppercase text-signal-dim;
+  }
+
+  .text-value {
+    @apply font-mono text-sm tracking-tight text-signal;
+  }
+
+  .text-highlight {
+    @apply text-tritium;
+  }
+
+  /* Interactive Elements */
+  .instrument-button {
+    @apply inline-flex items-center justify-center px-6 py-3 font-mono text-xs uppercase tracking-widest border border-noise text-signal-dim transition-all duration-300 hover:border-signal hover:text-signal hover:bg-noise/50;
+    border-radius: 0;
+  }
+
+  .instrument-button-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 font-mono text-xs uppercase tracking-widest bg-signal text-void transition-all duration-300 hover:bg-white;
+    border-radius: 0;
+  }
+
+  /* Canvas Noise Pattern */
+  .noise-bg {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 10;
+  }
+  
+  .grid-bg {
     background-image: 
-      radial-gradient(at 0% 0%, hsla(210,100%,95%,1) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(280,100%,95%,1) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(350,100%,95%,1) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, hsla(150,100%,95%,1) 0px, transparent 50%);
-  }
-
-  .dot-pattern {
-    background-image: radial-gradient(#e4e4e7 1px, transparent 1px);
-    background-size: 20px 20px;
+      linear-gradient(to right, #1A1A1A 1px, transparent 1px),
+      linear-gradient(to bottom, #1A1A1A 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: center center;
   }
 }
