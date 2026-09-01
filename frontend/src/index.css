@@ -1,90 +1,87 @@
-@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-bone: #F7F7F5;
-  --color-graphite: #111111;
-  --color-graphite-soft: #333333;
-  --color-graphite-faint: #E5E5E0;
-  --color-ultramarine: #0400FF;
-  --color-vermilion: #FF2400;
-
-  --font-serif: 'Newsreader', serif;
+  --color-space-black: #000000; /* Pure stark black */
+  --color-accent-primary: #ccff00; /* Neon chartreuse */
+  --color-accent-secondary: #ff3f00; /* Electric orange */
+  
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #888888;
+  
+  --font-sans: 'Archivo', sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
   --font-mono: 'Space Mono', monospace;
 }
 
 @layer base {
-  html {
-    scroll-behavior: smooth;
-    background-color: var(--color-bone);
+  body {
+    @apply bg-space-black text-text-primary font-sans antialiased overflow-x-hidden;
+    /* Subtle noise/grain for brutalist texture */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+    background-attachment: fixed;
   }
   
-  body {
-    @apply bg-bone text-graphite font-mono antialiased overflow-x-hidden;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    scrollbar-width: none; /* Hide scrollbar for immersive feel */
-  }
-
   ::selection {
-    @apply bg-ultramarine text-bone;
+    @apply bg-accent-primary text-black;
   }
 }
 
 @layer utilities {
-  .canvas-container {
-    @apply relative w-full min-h-screen bg-bone overflow-hidden flex flex-col;
+  .brutal-panel {
+    @apply bg-[#050505] border border-white/10;
   }
 
-  /* Architectural Grid lines */
-  .grid-line-x {
-    @apply border-b border-graphite-faint;
-  }
-  .grid-line-y {
-    @apply border-r border-graphite-faint;
-  }
-  .grid-line-all {
-    @apply border border-graphite-faint;
-  }
-
-  /* Typography */
-  .text-editorial {
-    @apply font-serif text-5xl md:text-7xl leading-[0.95] tracking-tight;
+  .brutal-border {
+    @apply border border-white/10;
   }
   
-  .text-editorial-sub {
-    @apply font-serif text-2xl md:text-3xl leading-snug tracking-tight text-graphite-soft;
+  .brutal-border-b {
+    @apply border-b border-white/10;
   }
 
-  .text-data-label {
-    @apply font-mono text-[10px] md:text-xs tracking-widest uppercase text-graphite-soft;
+  .brutal-grid {
+    @apply relative overflow-hidden;
   }
 
-  .text-data-value {
-    @apply font-mono text-sm tracking-tight text-graphite;
+  /* Scanline effect */
+  .scanlines {
+    position: relative;
   }
-
-  /* Interactive Elements */
-  .forensic-button {
-    @apply inline-flex items-center justify-center px-8 py-4 font-mono text-xs uppercase tracking-widest border border-graphite text-graphite transition-all duration-300 hover:bg-graphite hover:text-bone;
-    border-radius: 0;
-  }
-
-  .forensic-button-primary {
-    @apply inline-flex items-center justify-center px-8 py-4 font-mono text-xs uppercase tracking-widest bg-ultramarine text-bone transition-all duration-300 hover:bg-graphite;
-    border-radius: 0;
+  .scanlines::after {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0),
+      rgba(255, 255, 255, 0) 50%,
+      rgba(0, 0, 0, 0.1) 50%,
+      rgba(0, 0, 0, 0.1)
+    );
+    background-size: 100% 4px;
+    z-index: 100;
+    pointer-events: none;
   }
   
-  .evidence-node {
-    @apply absolute p-4 bg-bone border border-graphite-faint shadow-sm cursor-pointer transition-colors duration-300 hover:border-ultramarine hover:text-ultramarine;
-    border-radius: 0;
+  .badge-success {
+    @apply text-black bg-accent-primary px-3 py-1 text-xs font-mono font-bold tracking-widest uppercase;
+  }
+  
+  .badge-warning {
+    @apply text-black bg-accent-secondary px-3 py-1 text-xs font-mono font-bold tracking-widest uppercase;
+  }
+  
+  .badge-danger {
+    @apply text-white bg-red-600 px-3 py-1 text-xs font-mono font-bold tracking-widest uppercase;
   }
 
-  /* Backgrounds */
-  .drafting-paper-bg {
-    background-image: radial-gradient(var(--color-graphite-faint) 1px, transparent 1px);
-    background-size: 24px 24px;
-    background-position: -12px -12px;
+  /* Neobrutalist button */
+  .neo-button {
+    @apply inline-flex items-center justify-center border border-white/20 bg-transparent text-white px-6 py-3 font-mono text-sm tracking-widest uppercase transition-all duration-200 hover:bg-white hover:text-black hover:-translate-y-1 hover:shadow-[4px_4px_0_0_rgba(204,255,0,1)];
   }
 }

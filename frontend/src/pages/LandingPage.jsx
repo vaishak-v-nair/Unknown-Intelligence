@@ -1,144 +1,176 @@
-import React, { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { Database, Cpu, Eye, ArrowRight, Server, Shield, Network } from "lucide-react";
 
 export default function LandingPage() {
-  const containerRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"]
-  });
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
 
-  // Typography Opacities for storytelling
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
-  const noiseOpacity = useTransform(scrollYProgress, [0.15, 0.3, 0.45], [0, 1, 0]);
-  const relationshipsOpacity = useTransform(scrollYProgress, [0.45, 0.6, 0.75], [0, 1, 0]);
-  const discoveryOpacity = useTransform(scrollYProgress, [0.75, 0.85, 1], [0, 1, 1]);
-
-  // Topology SVG Warping (simulated via scale and rotation for performance)
-  const topoScale = useTransform(scrollYProgress, [0, 1], [1, 1.5]);
-  const topoRotate = useTransform(scrollYProgress, [0, 1], [0, 45]);
-  const topoOpacity = useTransform(scrollYProgress, [0, 0.8, 1], [0.1, 0.1, 0.02]);
-  
-  // The 'Ultramarine' Snap
-  const snapOpacity = useTransform(scrollYProgress, [0.8, 0.85], [0, 1]);
+  const fadeUp = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 100, damping: 20 } }
+  };
 
   return (
-    <div ref={containerRef} className="canvas-container h-[400vh] relative">
-      <div className="fixed inset-0 drafting-paper-bg opacity-50 z-0 pointer-events-none"></div>
-
-      {/* Top Nav */}
-      <nav className="fixed top-0 left-0 w-full p-8 flex items-center justify-between z-50 border-b border-graphite-faint bg-bone/80 backdrop-blur-sm">
-        <div className="font-mono text-xs tracking-widest uppercase text-graphite font-bold">
-          Unknown Intelligence
-        </div>
-        <div className="flex gap-12 text-data-label items-center">
-          <a href="#" className="hover:text-graphite transition-colors">Thesis</a>
-          <a href="#" className="hover:text-graphite transition-colors">Architecture</a>
-          <Link to="/dashboard" className="text-ultramarine font-bold hover:text-graphite transition-colors">Access Workspace</Link>
-        </div>
-      </nav>
-
-      {/* Fluid Topographical Background */}
-      <motion.div 
-        style={{ scale: topoScale, rotate: topoRotate, opacity: topoOpacity }}
-        className="fixed inset-0 flex items-center justify-center pointer-events-none z-0"
-      >
-        <svg width="200%" height="200%" viewBox="0 0 100 100" preserveAspectRatio="none">
-           <path d="M10,50 Q25,20 50,50 T90,50" fill="none" stroke="currentColor" strokeWidth="0.1" />
-           <path d="M10,60 Q25,30 50,60 T90,60" fill="none" stroke="currentColor" strokeWidth="0.1" />
-           <path d="M10,40 Q25,10 50,40 T90,40" fill="none" stroke="currentColor" strokeWidth="0.1" />
-           <path d="M20,50 Q40,80 60,50 T90,50" fill="none" stroke="currentColor" strokeWidth="0.1" />
-           <path d="M0,30 Q30,60 70,30 T100,30" fill="none" stroke="currentColor" strokeWidth="0.1" />
-        </svg>
-      </motion.div>
-
-      {/* Foreground Interactive Content */}
-      <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden z-20 pointer-events-none">
-        
-        {/* STAGE 0: HERO */}
+    <div className="relative w-full min-h-screen bg-space-black">
+      {/* Hero Section */}
+      <div className="relative min-h-[80vh] flex flex-col justify-center px-8 md:px-16 pt-20 brutal-border-b">
         <motion.div 
-          style={{ opacity: heroOpacity }}
-          className="absolute inset-0 flex flex-col items-center justify-center text-center px-6"
+          className="z-10 w-full max-w-7xl mx-auto"
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
         >
-          <div className="text-data-label mb-12 border border-graphite px-4 py-2">Forensic Observation Active</div>
-          <h1 className="text-editorial text-graphite max-w-5xl mx-auto mb-10">
-            Find what your system is becoming <br/>
-            <span className="italic text-graphite-soft">before it becomes obvious.</span>
-          </h1>
-          <div className="w-px h-24 bg-graphite-faint mt-8"></div>
+          <motion.h1 variants={fadeUp} className="font-display text-7xl md:text-[10rem] font-bold tracking-tighter leading-[0.8] mb-8 text-text-primary uppercase">
+            Reveal <br/>
+            <span className="text-accent-primary">The Unseen.</span>
+          </motion.h1>
+          
+          <motion.p variants={fadeUp} className="text-lg md:text-xl text-text-secondary max-w-2xl mb-12 font-mono uppercase tracking-wide leading-relaxed">
+            Proactive data intelligence powered by <strong className="text-white">Cross-Author Convergence</strong> and <strong className="text-white">Vector DBs</strong>. We find the anomalies you didn't know to look for.
+          </motion.p>
+          
+          <motion.div variants={fadeUp}>
+            <Link to="/dashboard" className="neo-button text-lg">
+              [ Init_Dashboard ]
+            </Link>
+          </motion.div>
         </motion.div>
+      </div>
 
-        {/* STAGE 1: NOISE */}
+      {/* Feature Grid */}
+      <div className="relative w-full z-10">
         <motion.div 
-          style={{ opacity: noiseOpacity }}
-          className="absolute inset-0 flex flex-col items-center justify-center text-center"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          variants={staggerContainer}
+          className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/10 brutal-border-b"
         >
-          <div className="font-serif text-8xl text-graphite-faint tracking-tighter mb-8 italic">Noise.</div>
-          <p className="text-data-value max-w-lg mx-auto text-graphite-soft leading-relaxed">
-            14,203 disparate events. The raw, unstructured topology of your engineering effort before synthesis.
-          </p>
-          <div className="absolute inset-0 flex flex-wrap justify-center items-center opacity-10 pointer-events-none">
-             {Array.from({length: 60}).map((_, i) => (
-                <div key={i} className="font-mono text-[8px] absolute" style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}>
-                  {Math.random().toString(36).substring(7)}
-                </div>
-             ))}
-          </div>
-        </motion.div>
-
-        {/* STAGE 2: RELATIONSHIPS */}
-        <motion.div 
-          style={{ opacity: relationshipsOpacity }}
-          className="absolute inset-0 flex flex-col items-center justify-center text-center bg-bone/50 backdrop-blur-sm"
-        >
-          <div className="grid-line-all p-12 bg-bone relative">
-             <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-graphite"></div>
-             <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-graphite"></div>
-             <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-graphite"></div>
-             <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-graphite"></div>
-             <div className="font-serif text-6xl text-graphite tracking-tight mb-6">Emergence.</div>
-             <p className="text-editorial-sub max-w-xl mx-auto">
-               Temporal drift detected. Isolated authors are mathematically converging on the same unseen problem.
-             </p>
-          </div>
-        </motion.div>
-
-        {/* STAGE 3: DISCOVERY (The Blueprint Snap) */}
-        <motion.div 
-          style={{ opacity: discoveryOpacity }}
-          className="absolute inset-0 flex flex-col items-center justify-center bg-bone pointer-events-auto"
-        >
-          {/* Background Structural Grid snaps into place */}
-          <motion.div style={{ opacity: snapOpacity }} className="absolute inset-0 z-0">
-            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" className="opacity-10">
-              <defs>
-                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="0.5"/>
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#grid)" />
-            </svg>
-            <div className="absolute top-1/2 left-0 w-full h-px bg-ultramarine opacity-20"></div>
-            <div className="absolute left-1/2 top-0 h-full w-px bg-ultramarine opacity-20"></div>
+          <motion.div variants={fadeUp} className="p-12 hover:bg-white hover:text-black transition-colors duration-200 group">
+            <div className="mb-8">
+              <Database size={32} className="text-accent-secondary group-hover:text-black" />
+            </div>
+            <h3 className="text-3xl font-display font-bold mb-4 uppercase">Pure RAG<br/>Grounding</h3>
+            <p className="font-mono text-sm uppercase tracking-wide leading-relaxed opacity-70 group-hover:opacity-100">Zero AI hallucinations. Purely evidence-based intelligence derived strictly from your local vectors.</p>
           </motion.div>
           
-          <div className="z-10 text-center flex flex-col items-center">
-            <div className="text-data-label text-ultramarine mb-8 border border-ultramarine px-4 py-2 bg-ultramarine/5">
-              Structural Reality Revealed
+          <motion.div variants={fadeUp} className="p-12 hover:bg-white hover:text-black transition-colors duration-200 group">
+            <div className="mb-8">
+              <Cpu size={32} className="text-accent-primary group-hover:text-black" />
             </div>
-            <h2 className="text-editorial text-graphite mb-16">See the invisible.</h2>
-            <div className="flex gap-6">
-              <Link to="/dashboard" className="forensic-button-primary">
-                Open Forensic Workspace
-              </Link>
-              <button className="forensic-button">
-                Read the Architecture
-              </button>
-            </div>
-          </div>
-        </motion.div>
+            <h3 className="text-3xl font-display font-bold mb-4 uppercase">Autonomous<br/>Agents</h3>
+            <p className="font-mono text-sm uppercase tracking-wide leading-relaxed opacity-70 group-hover:opacity-100">The system never sleeps. Background loops continuously investigate, synthesize, and categorize datasets.</p>
+          </motion.div>
 
+          <motion.div variants={fadeUp} className="p-12 hover:bg-white hover:text-black transition-colors duration-200 group">
+            <div className="mb-8">
+              <Eye size={32} className="text-text-primary group-hover:text-black" />
+            </div>
+            <h3 className="text-3xl font-display font-bold mb-4 uppercase">Uncover<br/>Blindspots</h3>
+            <p className="font-mono text-sm uppercase tracking-wide leading-relaxed opacity-70 group-hover:opacity-100">By tracking distinct author convergence, we identify critical 'Unknowns' before they become failures.</p>
+          </motion.div>
+        </motion.div>
+      </div>
+
+      {/* Pipeline Section */}
+      <div className="relative w-full z-10 bg-black brutal-border-b py-24">
+        <div className="max-w-7xl mx-auto px-8 md:px-16">
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerContainer}
+            className="flex flex-col md:flex-row gap-16"
+          >
+            <div className="flex-1">
+              <motion.h2 variants={fadeUp} className="font-display text-5xl md:text-7xl font-bold uppercase mb-8">
+                The <span className="text-accent-secondary">Pipeline.</span>
+              </motion.h2>
+              <motion.p variants={fadeUp} className="font-mono text-sm text-text-secondary uppercase tracking-widest leading-relaxed max-w-md">
+                Unknown Intelligence operates via a strict three-phase proactive ingestion loop. Raw data enters, noise is stripped, and highly structured anomalies are discovered entirely in the background.
+              </motion.p>
+            </div>
+            
+            <div className="flex-1 flex flex-col gap-8 font-mono">
+              <motion.div variants={fadeUp} className="brutal-border p-8 hover:border-accent-primary transition-colors">
+                <div className="text-accent-primary font-bold text-2xl mb-2">01. INGESTION</div>
+                <div className="text-text-secondary text-sm uppercase">Scraping massive parallel streams of data from raw API events, normalizing structured payloads into a scalable NoSQL backend.</div>
+              </motion.div>
+              <motion.div variants={fadeUp} className="brutal-border p-8 hover:border-accent-secondary transition-colors">
+                <div className="text-accent-secondary font-bold text-2xl mb-2">02. VECTORIZATION</div>
+                <div className="text-text-secondary text-sm uppercase">Translating textual observations into high-dimensional vector embeddings, allowing for rapid semantic similarity search across disconnected authors.</div>
+              </motion.div>
+              <motion.div variants={fadeUp} className="brutal-border p-8 hover:border-white transition-colors">
+                <div className="text-white font-bold text-2xl mb-2">03. SYNTHESIS</div>
+                <div className="text-text-secondary text-sm uppercase">LLM-powered background agents cross-reference vector clusters, forming hypotheses, demanding evidence, and rejecting hallucinations before hitting your dashboard.</div>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Dark Metrics */}
+      <div className="relative w-full z-10 py-24 bg-[#020202]">
+        <div className="max-w-7xl mx-auto px-8 md:px-16 text-center">
+          <motion.h2 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="font-display text-4xl md:text-6xl font-bold uppercase mb-16"
+          >
+            Built for <span className="text-accent-primary">Scale.</span>
+          </motion.h2>
+          
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={staggerContainer}
+            className="grid grid-cols-2 md:grid-cols-4 gap-8"
+          >
+            <motion.div variants={fadeUp} className="flex flex-col items-center">
+              <Server size={48} className="text-accent-secondary mb-4" />
+              <div className="font-display text-5xl font-bold mb-2 text-white">0</div>
+              <div className="font-mono text-xs text-text-secondary uppercase tracking-widest">Downtime</div>
+            </motion.div>
+            <motion.div variants={fadeUp} className="flex flex-col items-center">
+              <Shield size={48} className="text-accent-primary mb-4" />
+              <div className="font-display text-5xl font-bold mb-2 text-white">100%</div>
+              <div className="font-mono text-xs text-text-secondary uppercase tracking-widest">Evidence Backed</div>
+            </motion.div>
+            <motion.div variants={fadeUp} className="flex flex-col items-center">
+              <Database size={48} className="text-text-secondary mb-4" />
+              <div className="font-display text-5xl font-bold mb-2 text-white">Sub-sec</div>
+              <div className="font-mono text-xs text-text-secondary uppercase tracking-widest">Vector Search</div>
+            </motion.div>
+            <motion.div variants={fadeUp} className="flex flex-col items-center">
+              <Network size={48} className="text-white mb-4" />
+              <div className="font-display text-5xl font-bold mb-2 text-white">Infinite</div>
+              <div className="font-mono text-xs text-text-secondary uppercase tracking-widest">Scale</div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <div className="relative w-full z-10 bg-accent-primary text-black py-32 brutal-border-t">
+        <div className="max-w-4xl mx-auto px-8 text-center flex flex-col items-center">
+          <h2 className="font-display text-6xl md:text-8xl font-bold uppercase tracking-tighter mb-8 leading-none">
+            Stop <br/> Guessing.
+          </h2>
+          <p className="font-mono text-sm md:text-base font-bold uppercase tracking-widest mb-12 opacity-80 max-w-xl">
+            The data is already there. You just need the right intelligence engine to piece it together.
+          </p>
+          <Link to="/dashboard" className="px-10 py-5 bg-black text-accent-primary font-display font-bold text-xl uppercase tracking-widest hover:bg-white hover:text-black transition-colors flex items-center gap-4 group">
+            Execute <ArrowRight size={24} className="group-hover:translate-x-2 transition-transform" />
+          </Link>
+        </div>
       </div>
     </div>
   );
