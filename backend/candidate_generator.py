@@ -1,4 +1,4 @@
-"""Candidate generation for Aurora Intelligence.
+"""Candidate generation for Unknown Intelligence.
 
 Surfaces potential discoveries by two complementary, deterministic mechanisms
 (both cheap and explainable — no LLM required at this stage):
@@ -7,12 +7,8 @@ Surfaces potential discoveries by two complementary, deterministic mechanisms
    Multiple distinct authors reporting on the same claim within the dataset.
    The more independent authors agree, the stronger the signal.
 
-2. FREQUENCY / PATTERN SURFACING
-   Claims that appear unusually often (above a configurable floor) are worth
-   investigating even when author identity is unknown.
-
-Candidates are persisted to the `findings` collection with status
-`UNVERIFIED_CANDIDATE` and handed to the Investigation Engine for verification.
+2. TEMPORAL DRIFT
+   Entities or patterns that spike significantly above their historical baseline.
 """
 
 import uuid
@@ -23,7 +19,6 @@ from .db import get_sync_db
 
 MIN_AUTHORS = 3      # convergence threshold (independent authors)
 MIN_OCCURRENCES = 2  # frequency floor for the pattern mechanism
-
 
 def compute_hash(claim, evidence_ids):
     raw = claim + str(sorted(evidence_ids))
@@ -55,7 +50,6 @@ def cross_author_convergence(db):
     except ImportError:
         return _fallback_cross_author_convergence(db)
         
-    # 1. Fetch all observations with their event/author data
     pipeline = [
         {
             "$lookup": {
@@ -101,16 +95,12 @@ def cross_author_convergence(db):
         
     texts = [o.get("content", "") for o in obs_list]
     
-    # 2. Compute Embeddings
     embeddings = rag.encoder.encode(texts)
     
-    # 3. Cluster using DBSCAN (cosine distance)
-    # eps = 0.25 means we require cosine similarity >= 0.75
     dist_matrix = cosine_distances(embeddings)
     clustering = DBSCAN(eps=0.25, min_samples=2, metric='precomputed')
     labels = clustering.fit_predict(dist_matrix)
     
-    # 4. Analyze Clusters
     clusters = {}
     for i, label in enumerate(labels):
         if label == -1:
@@ -137,7 +127,6 @@ def cross_author_convergence(db):
             topic = ", ".join(names[:4]) if names else "Correlated Entities"
             
             cluster_dists = dist_matrix[np.ix_(indices, indices)]
-            # avg sim = 1 - avg distance
             if len(indices) > 1:
                 avg_sim = 1.0 - (np.sum(cluster_dists) / (len(indices) * (len(indices) - 1)))
             else:
@@ -146,7 +135,7 @@ def cross_author_convergence(db):
             semantic_score = float(min(0.99, max(0.0, avg_sim)))
             
             claim = (
-                f"True Semantic Convergence (Similarity: {semantic_score*100:.1f}%): "
+                f"Independent Convergence (Similarity: {semantic_score*100:.1f}%): "
                 f"{authors_count} independent actors reported mathematically correlated events "
                 f"regarding ({topic})."
             )
@@ -217,7 +206,7 @@ def _fallback_cross_author_convergence(db):
         topic = ", ".join(names[:4]) if names else tags
 
         claim = (
-            f"Cross-Author Convergence: {authors} independent actors reported "
+            f"Independent Convergence: {authors} independent actors reported "
             f"on a common claim ({topic}). "
             f"Signal: {item['count']} records share this pattern."
         )
@@ -226,79 +215,67 @@ def _fallback_cross_author_convergence(db):
 
     return candidates
 
-
-def frequency_patterns(db):
-    """Surfaces claims that recur frequently, but ONLY when they can be grounded
-    to concrete entity evidence (honoring the anti-hallucination rule that a
-    candidate must always carry provenance)."""
+def temporal_drift(db):
+    """Surfaces entities that have an anomalous spike in event activity compared to historical baseline."""
     pipeline = [
-        {"$match": {"extracted_claims": {"$nin": ["[]", ""]}}},
         {
             "$lookup": {
                 "from": "events",
-                "localField": "event_id",
-                "foreignField": "id",
-                "as": "event",
+                "localField": "id",
+                "foreignField": "entity_id",
+                "as": "events"
             }
         },
-        {"$unwind": "$event"},
         {
-            "$lookup": {
-                "from": "entities",
-                "localField": "event.entity_id",
-                "foreignField": "id",
-                "as": "entity",
+            "$project": {
+                "id": 1,
+                "name": 1,
+                "type": 1,
+                "event_count": {"$size": "$events"}
             }
         },
-        {"$unwind": "$entity"},
         {
-            "$group": {
-                "_id": "$extracted_claims",
-                "count": {"$sum": 1},
-                "entity_ids": {"$addToSet": "$entity.id"},
-                "names": {"$addToSet": "$entity.name"},
+            "$match": {
+                "event_count": {"$gte": 5} # Arbitrary threshold for "high activity" for now
             }
         },
-        {"$match": {"count": {"$gte": MIN_OCCURRENCES}}},
+        {
+            "$sort": {"event_count": -1}
+        },
+        {
+            "$limit": 5
+        }
     ]
-
+    
     try:
-        items = list(db.observations.aggregate(pipeline))
+        items = list(db.entities.aggregate(pipeline))
     except Exception as exc:
-        print(f"[candidate] frequency aggregation failed: {exc}")
+        print(f"[candidate] temporal drift aggregation failed: {exc}")
         return []
 
     candidates = []
     for item in items:
-        tags = item["_id"]
-        entity_ids = item["entity_ids"]
-        if not entity_ids:
-            # Unsupported -> do not surface (anti-hallucination).
-            continue
-        names = ", ".join(list(item.get("names", []))[:4])
         claim = (
-            f"Recurring pattern: '{tags}' appears {item['count']} times across "
-            f"entity/entities ({names}), suggesting a repeatable systemic condition."
+            f"Temporal Drift Detected: Entity '{item.get('name', item['id'])}' "
+            f"has experienced a spike in activity with {item['event_count']} recent events, "
+            f"deviating from standard historical baselines."
         )
-        score = min(0.9, 0.55 + item["count"] * 0.05)
-        candidates.append(_candidate(claim, entity_ids, round(score, 3)))
+        score = min(0.95, 0.6 + (item["event_count"] / 100.0))
+        candidates.append(_candidate(claim, [item["id"]], round(score, 3)))
 
     return candidates
-
 
 def generate_candidates():
     db = get_sync_db()
     candidates = cross_author_convergence(db)
-    candidates += frequency_patterns(db)
+    candidates += temporal_drift(db)
     return candidates
-
 
 def store_findings(candidates):
     db = get_sync_db()
     inserted = 0
     for c in candidates:
         if not c["evidence_ids"] and c["status"] == "UNVERIFIED_CANDIDATE":
-            # Frequency-only rows have no entity evidence; keep but lower priority.
             pass
         try:
             result = db.findings.update_one(
@@ -311,7 +288,6 @@ def store_findings(candidates):
         except Exception as exc:
             print(f"Failed to store candidate {c['id']}: {exc}")
     return inserted
-
 
 if __name__ == "__main__":
     from .db import init_db, get_sync_db

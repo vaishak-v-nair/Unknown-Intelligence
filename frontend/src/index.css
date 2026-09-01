@@ -1,87 +1,58 @@
-@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-space-black: #000000; /* Pure stark black */
-  --color-accent-primary: #ccff00; /* Neon chartreuse */
-  --color-accent-secondary: #ff3f00; /* Electric orange */
+  --color-brand-primary: #5741D9;
+  --color-brand-secondary: #8B5CF6;
+  --color-brand-light: #F5F3FF;
   
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #888888;
+  --color-surface-white: #ffffff;
+  --color-surface-gray: #f8fafc;
   
-  --font-sans: 'Archivo', sans-serif;
-  --font-display: 'Space Grotesk', sans-serif;
-  --font-mono: 'Space Mono', monospace;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #64748b;
+  --color-text-muted: #94a3b8;
+  
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Playfair Display', serif;
 }
 
 @layer base {
   body {
-    @apply bg-space-black text-text-primary font-sans antialiased overflow-x-hidden;
-    /* Subtle noise/grain for brutalist texture */
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
-    background-attachment: fixed;
+    @apply bg-surface-gray text-text-primary font-sans antialiased overflow-x-hidden;
   }
   
   ::selection {
-    @apply bg-accent-primary text-black;
+    @apply bg-brand-primary/20 text-brand-primary;
   }
 }
 
 @layer utilities {
-  .brutal-panel {
-    @apply bg-[#050505] border border-white/10;
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl;
   }
 
-  .brutal-border {
-    @apply border border-white/10;
-  }
-  
-  .brutal-border-b {
-    @apply border-b border-white/10;
+  .saas-card {
+    @apply bg-white border border-slate-200 shadow-sm rounded-xl;
   }
 
-  .brutal-grid {
-    @apply relative overflow-hidden;
-  }
-
-  /* Scanline effect */
-  .scanlines {
-    position: relative;
-  }
-  .scanlines::after {
-    content: " ";
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background: linear-gradient(
-      to bottom,
-      rgba(255, 255, 255, 0),
-      rgba(255, 255, 255, 0) 50%,
-      rgba(0, 0, 0, 0.1) 50%,
-      rgba(0, 0, 0, 0.1)
-    );
-    background-size: 100% 4px;
-    z-index: 100;
-    pointer-events: none;
-  }
-  
   .badge-success {
-    @apply text-black bg-accent-primary px-3 py-1 text-xs font-mono font-bold tracking-widest uppercase;
+    @apply text-emerald-700 bg-emerald-50 px-2.5 py-1 text-xs font-semibold rounded-full border border-emerald-200;
   }
   
   .badge-warning {
-    @apply text-black bg-accent-secondary px-3 py-1 text-xs font-mono font-bold tracking-widest uppercase;
+    @apply text-amber-700 bg-amber-50 px-2.5 py-1 text-xs font-semibold rounded-full border border-amber-200;
   }
   
   .badge-danger {
-    @apply text-white bg-red-600 px-3 py-1 text-xs font-mono font-bold tracking-widest uppercase;
+    @apply text-rose-700 bg-rose-50 px-2.5 py-1 text-xs font-semibold rounded-full border border-rose-200;
   }
 
-  /* Neobrutalist button */
-  .neo-button {
-    @apply inline-flex items-center justify-center border border-white/20 bg-transparent text-white px-6 py-3 font-mono text-sm tracking-widest uppercase transition-all duration-200 hover:bg-white hover:text-black hover:-translate-y-1 hover:shadow-[4px_4px_0_0_rgba(204,255,0,1)];
+  .saas-button {
+    @apply inline-flex items-center justify-center bg-brand-primary text-white px-6 py-3 font-medium text-sm rounded-lg transition-all duration-200 hover:bg-brand-primary/90 hover:shadow-md hover:-translate-y-0.5;
+  }
+  
+  .saas-button-outline {
+    @apply inline-flex items-center justify-center border border-slate-200 bg-white text-text-primary px-6 py-3 font-medium text-sm rounded-lg transition-all duration-200 hover:bg-slate-50 hover:border-slate-300;
   }
 }

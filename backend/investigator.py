@@ -227,6 +227,11 @@ TASK:
 Determine whether this is a real, MATERIAL discovery that warrants escalating
 to a human (a signal that is not merely statistically unusual but also
 potentially action-worthy). Be highly skeptical.
+
+Crucially, you must perform SELF-FALSIFICATION:
+1. What else could explain this? (Generate counter-hypotheses)
+2. Is there direct evidence AGAINST the hypothesis in the raw evidence?
+
 - VERIFIED_DISCOVERY if the evidence genuinely supports a material,
   actionable pattern or deviation and counter-explanations are weak.
 - REJECTED if the evidence shows only noise, unrelated items, or a condition
@@ -239,7 +244,7 @@ Output strict JSON (no markdown, no backticks):
 {{
   "status": "VERIFIED_DISCOVERY | REJECTED | INSUFFICIENT_EVIDENCE",
   "why_surfaced": "Why this passed or failed verification",
-  "alternative_explanations": "What else could explain this",
+  "alternative_explanations": "What else could explain this? List counter-hypotheses here.",
   "confidence_score": 0.0
 }}
 """
